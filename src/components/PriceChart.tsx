@@ -30,11 +30,11 @@ interface PriceChartProps {
   stopLossPrice?: number;
 }
 
-type ChartViewMode = 'area' | 'indicators';
+type ChartViewMode = 'line' | 'area' | 'indicators';
 type TimeframeMode = '1D' | '1W' | '1M' | '3M' | '1Y';
 
 export const PriceChart: React.FC<PriceChartProps> = ({ stock, targetPrice, stopLossPrice }) => {
-  const [viewMode, setViewMode] = useState<ChartViewMode>('area');
+  const [viewMode, setViewMode] = useState<ChartViewMode>('line');
   const [timeframe, setTimeframe] = useState<TimeframeMode>('1D');
   const [showEMA20, setShowEMA20] = useState(true);
   const [showEMA50, setShowEMA50] = useState(true);
@@ -125,9 +125,36 @@ export const PriceChart: React.FC<PriceChartProps> = ({ stock, targetPrice, stop
     return chartData.slice(-count);
   }, [chartData, zoomLevel]);
 
-  const prices = displayData.map((d) => d.price);
-  const minPrice = prices.length ? Math.min(...prices) * 0.992 : stock.currentPrice * 0.98;
-  const maxPrice = prices.length ? Math.max(...prices) * 1.008 : stock.currentPrice * 1.02;
+  // Compute clean, non-distorted price boundaries (ignoring volume)
+  const allPricePoints = useMemo(() => {
+    return displayData.flatMap((d) => [
+      d.price,
+      d.open,
+      d.close,
+      d.high,
+      d.low,
+      showEMA20 && d.ema20 ? d.ema20 : null,
+      showEMA50 && d.ema50 ? d.ema50 : null,
+      showEMA200 && d.ema200 ? d.ema200 : null,
+    ]).filter((v): v is number => typeof v === 'number' && !isNaN(v) && v > 0);
+  }, [displayData, showEMA20, showEMA50, showEMA200]);
+
+  const minPrice = useMemo(() => {
+    if (!allPricePoints.length) return stock.currentPrice * 0.98;
+    const minVal = Math.min(...allPricePoints);
+    const maxVal = Math.max(...allPricePoints);
+    const pad = Math.max((maxVal - minVal) * 0.12, stock.currentPrice * 0.008);
+    return Number((minVal - pad).toFixed(2));
+  }, [allPricePoints, stock.currentPrice]);
+
+  const maxPrice = useMemo(() => {
+    if (!allPricePoints.length) return stock.currentPrice * 1.02;
+    const minVal = Math.min(...allPricePoints);
+    const maxVal = Math.max(...allPricePoints);
+    const pad = Math.max((maxVal - minVal) * 0.12, stock.currentPrice * 0.008);
+    return Number((maxVal + pad).toFixed(2));
+  }, [allPricePoints, stock.currentPrice]);
+
   const isUpTrend = stock.change >= 0;
 
   // Solid, high-performance Tooltip
@@ -291,9 +318,17 @@ export const PriceChart: React.FC<PriceChartProps> = ({ stock, targetPrice, stop
           {/* View Mode Switcher */}
           <div className="flex items-center bg-[#121218] p-0.5 rounded-lg border border-white/10">
             <button
+              onClick={() => setViewMode('line')}
+              className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
+                viewMode === 'line' ? 'bg-white text-black font-semibold shadow-sm' : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              Line
+            </button>
+            <button
               onClick={() => setViewMode('area')}
               className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
-                viewMode === 'area' ? 'bg-white text-black font-semibold' : 'text-neutral-400 hover:text-white'
+                viewMode === 'area' ? 'bg-white text-black font-semibold shadow-sm' : 'text-neutral-400 hover:text-white'
               }`}
             >
               Area
@@ -301,7 +336,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ stock, targetPrice, stop
             <button
               onClick={() => setViewMode('indicators')}
               className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
-                viewMode === 'indicators' ? 'bg-white text-black font-semibold' : 'text-neutral-400 hover:text-white'
+                viewMode === 'indicators' ? 'bg-white text-black font-semibold shadow-sm' : 'text-neutral-400 hover:text-white'
               }`}
             >
               EMA Lines
@@ -378,11 +413,11 @@ export const PriceChart: React.FC<PriceChartProps> = ({ stock, targetPrice, stop
       {/* Main Chart Canvas */}
       <div className="h-80 sm:h-96 w-full pt-4">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={displayData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+          <ComposedChart data={displayData} margin={{ top: 10, right: 15, left: -5, bottom: 0 }}>
             <defs>
               <linearGradient id="chartGradientObsidian" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={isUpTrend ? '#10b981' : '#f43f5e'} stopOpacity={0.25} />
-                <stop offset="95%" stopColor={isUpTrend ? '#10b981' : '#f43f5e'} stopOpacity={0.0} />
+                <stop offset="5%" stopColor={isUpTrend ? '#10b981' : '#06b6d4'} stopOpacity={0.25} />
+                <stop offset="95%" stopColor={isUpTrend ? '#10b981' : '#06b6d4'} stopOpacity={0.0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1A1A22" opacity={0.6} />
@@ -392,18 +427,29 @@ export const PriceChart: React.FC<PriceChartProps> = ({ stock, targetPrice, stop
               tickLine={false} 
               axisLine={{ stroke: '#1A1A22' }} 
             />
+            {/* Primary Price YAxis */}
             <YAxis
+              yAxisId="priceAxis"
               domain={[minPrice, maxPrice]}
-              tick={{ fontSize: 10, fill: '#737373', fontFamily: 'JetBrains Mono' }}
+              tick={{ fontSize: 10, fill: '#a3a3a3', fontFamily: 'JetBrains Mono' }}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(v) => `₹${v}`}
+              tickFormatter={(v) => `₹${Number(v).toFixed(1)}`}
+              width={65}
+            />
+            {/* Secondary Volume YAxis (Isolated at bottom, never distorts price) */}
+            <YAxis
+              yAxisId="volumeAxis"
+              orientation="right"
+              domain={[0, (dataMax: number) => (dataMax ? dataMax * 4.5 : 1000000)]}
+              hide={true}
             />
             <Tooltip content={<CustomTooltip />} />
 
             {/* AI Stop-loss Guardrail */}
             {stopLossPrice && (
               <ReferenceLine 
+                yAxisId="priceAxis"
                 y={stopLossPrice} 
                 stroke="#f43f5e" 
                 strokeDasharray="4 4" 
@@ -414,6 +460,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ stock, targetPrice, stop
             {/* AI Upside Target */}
             {targetPrice && (
               <ReferenceLine 
+                yAxisId="priceAxis"
                 y={targetPrice} 
                 stroke="#10b981" 
                 strokeDasharray="4 4" 
@@ -424,17 +471,32 @@ export const PriceChart: React.FC<PriceChartProps> = ({ stock, targetPrice, stop
             {/* Bollinger Bands */}
             {showBollinger && (
               <>
-                <Line type="monotone" dataKey="bollingerUpper" stroke="#06b6d4" strokeWidth={1} strokeDasharray="3 3" dot={false} name="BB Upper" />
-                <Line type="monotone" dataKey="bollingerLower" stroke="#06b6d4" strokeWidth={1} strokeDasharray="3 3" dot={false} name="BB Lower" />
+                <Line yAxisId="priceAxis" type="monotone" dataKey="bollingerUpper" stroke="#6366f1" strokeWidth={1} strokeDasharray="3 3" dot={false} name="BB Upper" />
+                <Line yAxisId="priceAxis" type="monotone" dataKey="bollingerLower" stroke="#6366f1" strokeWidth={1} strokeDasharray="3 3" dot={false} name="BB Lower" />
               </>
             )}
 
-            {/* Primary Price Area */}
-            {viewMode === 'area' && (
-              <Area
+            {/* Primary Line Graph (Default) */}
+            {viewMode === 'line' && (
+              <Line
+                yAxisId="priceAxis"
                 type="monotone"
                 dataKey="price"
-                stroke={isUpTrend ? '#10b981' : '#f43f5e'}
+                stroke={isUpTrend ? '#10b981' : '#38bdf8'}
+                strokeWidth={2.5}
+                dot={{ r: 2.5, fill: isUpTrend ? '#10b981' : '#38bdf8', stroke: '#0A0A0E', strokeWidth: 1.5 }}
+                activeDot={{ r: 5.5, fill: '#ffffff', stroke: isUpTrend ? '#10b981' : '#38bdf8', strokeWidth: 2.5 }}
+                name="Stock Price"
+              />
+            )}
+
+            {/* Area Graph Mode */}
+            {viewMode === 'area' && (
+              <Area
+                yAxisId="priceAxis"
+                type="monotone"
+                dataKey="price"
+                stroke={isUpTrend ? '#10b981' : '#06b6d4'}
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#chartGradientObsidian)"
@@ -442,9 +504,10 @@ export const PriceChart: React.FC<PriceChartProps> = ({ stock, targetPrice, stop
               />
             )}
 
-            {/* Indicator view */}
+            {/* Indicator / Technical Mode */}
             {viewMode === 'indicators' && (
               <Line
+                yAxisId="priceAxis"
                 type="monotone"
                 dataKey="price"
                 stroke="#ffffff"
@@ -456,18 +519,25 @@ export const PriceChart: React.FC<PriceChartProps> = ({ stock, targetPrice, stop
 
             {/* EMA Overlays */}
             {showEMA20 && (
-              <Line type="monotone" dataKey="ema20" stroke="#06b6d4" strokeWidth={1.8} dot={false} name="EMA 20" />
+              <Line yAxisId="priceAxis" type="monotone" dataKey="ema20" stroke="#06b6d4" strokeWidth={1.8} dot={false} name="EMA 20" />
             )}
             {showEMA50 && (
-              <Line type="monotone" dataKey="ema50" stroke="#8b5cf6" strokeWidth={1.8} dot={false} name="EMA 50" />
+              <Line yAxisId="priceAxis" type="monotone" dataKey="ema50" stroke="#8b5cf6" strokeWidth={1.8} dot={false} name="EMA 50" />
             )}
             {showEMA200 && (
-              <Line type="monotone" dataKey="ema200" stroke="#10b981" strokeWidth={1.8} dot={false} name="EMA 200" />
+              <Line yAxisId="priceAxis" type="monotone" dataKey="ema200" stroke="#10b981" strokeWidth={1.8} dot={false} name="EMA 200" />
             )}
 
-            {/* Volume overlay */}
+            {/* Isolated Volume overlay (Anchored subtly at bottom) */}
             {showVolume && (
-              <Bar dataKey="volume" yAxisId={0} fill="#3b4261" opacity={0.25} radius={[2, 2, 0, 0]} name="Volume" />
+              <Bar 
+                yAxisId="volumeAxis" 
+                dataKey="volume" 
+                fill="#334155" 
+                opacity={0.35} 
+                radius={[2, 2, 0, 0]} 
+                name="Volume" 
+              />
             )}
 
             <Brush 
