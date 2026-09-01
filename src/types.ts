@@ -118,7 +118,6 @@ export interface DetectiveOutput {
   agentName: string;
   agentRole: string;
   avatarIcon: string;
-  analogy: string;
   summary: string;
   verdict: SignalType;
   confidenceScore: number; // 0 to 100
@@ -141,7 +140,6 @@ export interface BossSynthesis {
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME';
   headline: string;
   plainEnglishExplanation: string;
-  beginnerAnalogy: string;
   customProfileReasoning: string;
   actionPlan: {
     suggestedAction: string;

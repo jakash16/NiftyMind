@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, ShieldCheck, Newspaper, AlertTriangle, CheckCircle2, ChevronRight, FileText, Sparkles, Clock, AlertCircle } from 'lucide-react';
+import { Activity, ShieldCheck, Newspaper, AlertTriangle, CheckCircle2, FileText, Sparkles, Clock, AlertCircle } from 'lucide-react';
 import { DetectiveOutput } from '../types';
 
 interface AgentDetectiveCardProps {
@@ -13,41 +13,34 @@ export const AgentDetectiveCard: React.FC<AgentDetectiveCardProps> = ({
   onInspectReasoning,
   onViewCitations,
 }) => {
-  // Agent Theme Styles with Geometric Balance Palette
   const getTheme = () => {
     switch (detective.agentId) {
       case 'chart':
         return {
-          border: 'border-slate-200',
-          accentBg: 'bg-indigo-50/60',
-          badge: 'bg-indigo-100 text-indigo-800 border-indigo-200',
-          iconBg: 'bg-indigo-600 text-white',
-          circleBadge: 'bg-indigo-100 text-indigo-700',
-          robotNum: 'Robot 1',
-          roleTitle: 'Technical Agent',
+          accentBg: 'bg-[#0E0E14] border-white/5',
+          badge: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20',
+          iconBg: 'bg-cyan-950/40 text-cyan-400 border border-cyan-500/20',
+          robotNum: 'Agent 01',
+          roleTitle: 'Technical Analyst',
           icon: Activity
         };
       case 'rulebook':
         return {
-          border: 'border-slate-200',
-          accentBg: 'bg-emerald-50/60',
-          badge: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-          iconBg: 'bg-emerald-600 text-white',
-          circleBadge: 'bg-emerald-100 text-emerald-700',
-          robotNum: 'Robot 2',
-          roleTitle: 'Regulatory & RAG Agent',
+          accentBg: 'bg-[#0E0E14] border-white/5',
+          badge: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+          iconBg: 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/20',
+          robotNum: 'Agent 02',
+          roleTitle: 'Regulatory RAG',
           icon: ShieldCheck
         };
       case 'news':
       default:
         return {
-          border: 'border-slate-200',
-          accentBg: 'bg-amber-50/60',
-          badge: 'bg-amber-100 text-amber-800 border-amber-200',
-          iconBg: 'bg-amber-600 text-white',
-          circleBadge: 'bg-amber-100 text-amber-700',
-          robotNum: 'Robot 3',
-          roleTitle: 'Sentiment & Macro Agent',
+          accentBg: 'bg-[#0E0E14] border-white/5',
+          badge: 'bg-violet-500/10 text-violet-300 border-violet-500/20',
+          iconBg: 'bg-violet-950/40 text-violet-400 border border-violet-500/20',
+          robotNum: 'Agent 03',
+          roleTitle: 'Sentiment & Macro',
           icon: Newspaper
         };
     }
@@ -56,7 +49,6 @@ export const AgentDetectiveCard: React.FC<AgentDetectiveCardProps> = ({
   const theme = getTheme();
   const IconComponent = theme.icon;
 
-  // Signal Badge Colors
   const getVerdictBadge = () => {
     switch (detective.verdict) {
       case 'BULLISH':
@@ -64,7 +56,7 @@ export const AgentDetectiveCard: React.FC<AgentDetectiveCardProps> = ({
       case 'POSITIVE':
         return {
           text: detective.verdict,
-          color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+          color: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
           icon: CheckCircle2
         };
       case 'BEARISH':
@@ -72,20 +64,20 @@ export const AgentDetectiveCard: React.FC<AgentDetectiveCardProps> = ({
       case 'NEGATIVE':
         return {
           text: detective.verdict,
-          color: 'bg-rose-50 text-rose-700 border-rose-200',
+          color: 'bg-rose-500/10 text-rose-300 border-rose-500/20',
           icon: AlertTriangle
         };
       case 'WARNING':
         return {
-          text: 'WARNING / INCOMPLETE',
-          color: 'bg-amber-50 text-amber-700 border-amber-200',
+          text: 'WARNING',
+          color: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
           icon: AlertCircle
         };
       case 'NEUTRAL':
       default:
         return {
           text: detective.verdict,
-          color: 'bg-slate-50 text-slate-700 border-slate-200',
+          color: 'bg-white/5 text-neutral-300 border-white/10',
           icon: Activity
         };
     }
@@ -95,57 +87,60 @@ export const AgentDetectiveCard: React.FC<AgentDetectiveCardProps> = ({
   const VerdictIcon = verdictBadge.icon;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs flex flex-col justify-between transition-all hover:shadow-md relative overflow-hidden">
+    <div className="bg-[#0A0A0E] rounded-2xl p-6 border border-white/10 flex flex-col justify-between transition-all duration-200 hover:border-white/20 relative overflow-hidden">
       
-      {/* Degraded Notice Banner if active */}
+      {/* Degraded Notice Banner */}
       {detective.degradedStatus?.isDegraded && (
-        <div className="mb-3 -mt-2 -mx-2 px-3 py-1.5 rounded-xl bg-amber-500 text-white text-[11px] font-bold flex items-center justify-between shadow-xs animate-pulse-subtle">
+        <div className="mb-4 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
           <span className="flex items-center gap-1.5">
-            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-            <span>Accident Recovery: {detective.degradedStatus.reason}</span>
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+            <span>Fallback: {detective.degradedStatus.reason}</span>
           </span>
-          <span className="bg-amber-700 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">
-            Confidence {detective.degradedStatus.impactOnConfidence}%
+          <span className="bg-amber-500/20 px-1.5 py-0.2 rounded text-[10px] font-mono">
+            {detective.degradedStatus.impactOnConfidence}% Conf
           </span>
         </div>
       )}
 
-      {/* Top Header */}
+      {/* Header */}
       <div>
-        <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-start justify-between gap-3 mb-5">
           
-          {/* Avatar and Role */}
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl ${theme.iconBg} flex items-center justify-center shadow-xs shrink-0 ring-2 ring-slate-100`}>
+            <div className={`w-10 h-10 rounded-xl ${theme.iconBg} flex items-center justify-center shrink-0`}>
               <IconComponent className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-neutral-400">
                   {theme.robotNum}
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                <span className={`text-[10px] font-mono font-medium px-1.5 py-0.2 rounded border ${theme.badge}`}>
                   {theme.roleTitle}
                 </span>
               </div>
-              <h3 className="font-extrabold text-base text-slate-900 leading-tight">
+              <h3 className="font-semibold text-base text-white leading-tight mt-0.5">
                 {detective.agentName}
               </h3>
             </div>
           </div>
 
-          {/* Confidence Meter Badge */}
+          {/* Confidence Meter */}
           <div className="text-right shrink-0">
-            <div className="flex items-center gap-1 justify-end">
-              <span className="text-xs font-semibold text-slate-400">Confidence:</span>
-              <span className="font-extrabold text-sm text-slate-900 font-mono">
+            <div className="flex items-center gap-1 justify-end font-mono">
+              <span className="text-xs text-neutral-400">Conf:</span>
+              <span className="font-semibold text-xs text-white">
                 {detective.confidenceScore}%
               </span>
             </div>
-            <div className="w-20 bg-slate-100 h-1.5 rounded-full mt-1 overflow-hidden ml-auto">
+            <div className="w-16 bg-[#181822] h-1.5 rounded-full mt-1.5 overflow-hidden ml-auto">
               <div
                 className={`h-full rounded-full ${
-                  detective.confidenceScore >= 80 ? 'bg-emerald-500' : detective.confidenceScore >= 60 ? 'bg-amber-500' : 'bg-rose-500'
+                  detective.confidenceScore >= 80 
+                    ? 'bg-emerald-400' 
+                    : detective.confidenceScore >= 60 
+                    ? 'bg-amber-400' 
+                    : 'bg-rose-400'
                 }`}
                 style={{ width: `${detective.confidenceScore}%` }}
               />
@@ -154,41 +149,30 @@ export const AgentDetectiveCard: React.FC<AgentDetectiveCardProps> = ({
 
         </div>
 
-        {/* Intuitive Analogy Box (Kid-Friendly Explanation) */}
-        <div className={`${theme.accentBg} rounded-xl p-3.5 border border-slate-200/70 mb-3.5`}>
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-800 uppercase tracking-wide mb-1">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            <span>How This Detective Thinks (Analogy)</span>
-          </div>
-          <p className="text-xs font-medium text-slate-700 leading-relaxed italic">
-            "{detective.analogy}"
-          </p>
-        </div>
-
-        {/* Detective's Summary Verdict */}
-        <div className="mb-3.5">
-          <div className="flex items-center justify-between gap-2 mb-1.5">
-            <span className="text-xs font-bold text-slate-800">Detective's Finding:</span>
-            <span className={`inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold border ${verdictBadge.color}`}>
-              <VerdictIcon className="w-3.5 h-3.5" />
+        {/* Finding Verdict */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-xs text-neutral-400 font-medium">Verdict:</span>
+            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold border ${verdictBadge.color}`}>
+              <VerdictIcon className="w-3 h-3" />
               {verdictBadge.text}
             </span>
           </div>
-          <p className="text-xs text-slate-600 leading-relaxed bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
+          <p className="text-xs text-neutral-300 leading-relaxed bg-[#0E0E14] p-3 rounded-xl border border-white/5 font-mono">
             {detective.summary}
           </p>
         </div>
 
-        {/* Key Metrics Grid */}
-        <div className="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80 mb-3.5">
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Hedge-Fund Grade Telemetry
+        {/* Telemetry Metrics Grid */}
+        <div className="bg-[#0E0E14] rounded-xl p-3.5 border border-white/5 mb-4">
+          <div className="text-[10px] font-medium text-neutral-400 uppercase tracking-wider mb-2">
+            Telemetry Signals
           </div>
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(detective.keyMetrics).map(([key, value]) => (
-              <div key={key} className="bg-white px-2.5 py-1.5 rounded-lg border border-slate-200/80">
-                <div className="text-[10px] font-medium text-slate-400 truncate">{key}</div>
-                <div className="text-xs font-bold text-slate-900 font-mono truncate">{value}</div>
+              <div key={key} className="bg-[#14141C] px-2.5 py-1.5 rounded-lg border border-white/5">
+                <div className="text-[10px] text-neutral-400 truncate font-mono">{key}</div>
+                <div className="text-xs font-medium text-white truncate mt-0.5 font-mono">{value}</div>
               </div>
             ))}
           </div>
@@ -196,26 +180,24 @@ export const AgentDetectiveCard: React.FC<AgentDetectiveCardProps> = ({
 
       </div>
 
-      {/* Footer Actions: Step-by-Step Reasoning & Proof Citations */}
-      <div className="pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
+      {/* Footer Actions */}
+      <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-2">
         
-        {/* Reasoning Steps button */}
+        {/* Thinking steps button */}
         <button
           onClick={() => onInspectReasoning(detective)}
-          className="flex-1 py-2 px-3 rounded-full bg-slate-100 hover:bg-slate-200/90 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
-          title="Watch step-by-step how this robot came up with its answer"
+          className="flex-1 py-2 px-3 rounded-lg bg-[#121218] hover:bg-[#1A1A24] text-neutral-200 text-xs font-medium flex items-center justify-center gap-1.5 border border-white/10 transition-all"
         >
-          <Clock className="w-3.5 h-3.5 text-slate-500" />
-          <span>Show Thinking ({detective.reasoningChain.length} steps)</span>
+          <Clock className="w-3.5 h-3.5 text-cyan-400" />
+          <span>Thinking Trace ({detective.reasoningChain.length})</span>
         </button>
 
-        {/* Proof Citations button */}
+        {/* Citations Proof button */}
         <button
           onClick={() => onViewCitations(detective)}
-          className="py-2 px-3.5 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center gap-1.5 border border-indigo-200 transition-colors shadow-2xs"
-          title="View exact verified quotes from official SEBI and news documents"
+          className="py-2 px-3 rounded-lg bg-[#121218] hover:bg-[#1A1A24] text-neutral-200 text-xs font-medium flex items-center justify-center gap-1.5 border border-white/10 transition-all"
         >
-          <FileText className="w-3.5 h-3.5 text-indigo-600" />
+          <FileText className="w-3.5 h-3.5 text-violet-400" />
           <span>Proof ({detective.citations.length})</span>
         </button>
 

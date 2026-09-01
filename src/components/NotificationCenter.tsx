@@ -6,13 +6,11 @@ import {
   Zap, 
   Newspaper, 
   AlertTriangle, 
-  Check, 
   ArrowRight, 
   Settings2, 
   Sliders, 
   Plus, 
   Trash2, 
-  Radio, 
   Flame, 
   Activity,
   Sparkles
@@ -60,19 +58,19 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   const getIcon = (type: NotificationItem['type']) => {
     switch (type) {
       case 'FILING_ALERT':
-        return <ShieldCheck className="w-4 h-4 text-emerald-600" />;
+        return <ShieldCheck className="w-4 h-4 text-emerald-400" />;
       case 'SIGNAL_BREAKOUT':
-        return <Zap className="w-4 h-4 text-indigo-600" />;
+        return <Zap className="w-4 h-4 text-cyan-400" />;
       case 'SENTIMENT_SPIKE':
-        return <Newspaper className="w-4 h-4 text-purple-600" />;
+        return <Newspaper className="w-4 h-4 text-violet-400" />;
       case 'GOOGLE_TREND_SPIKE':
-        return <Flame className="w-4 h-4 text-rose-600" />;
+        return <Flame className="w-4 h-4 text-rose-400" />;
       case 'CUSTOM_ALERT':
-        return <Activity className="w-4 h-4 text-blue-600" />;
+        return <Activity className="w-4 h-4 text-cyan-400" />;
       case 'SYSTEM_DEGRADED':
       case 'PORTFOLIO_ALERT':
       default:
-        return <AlertTriangle className="w-4 h-4 text-amber-600" />;
+        return <AlertTriangle className="w-4 h-4 text-amber-400" />;
     }
   };
 
@@ -88,21 +86,21 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end p-4 sm:p-6 bg-slate-900/40 backdrop-blur-2xs animate-in fade-in duration-150">
-      <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[88vh] mt-10 sm:mt-12">
+    <div className="fixed inset-0 z-50 flex items-start justify-end p-4 sm:p-6 bg-black/85">
+      <div className="bg-[#0A0A0E] w-full max-w-lg rounded-2xl border border-white/10 overflow-hidden flex flex-col max-h-[88vh] mt-10 sm:mt-12">
         
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+        <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-[#08080C]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-white flex items-center justify-center">
               <Bell className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-slate-900">
-                Market Notification Center
+              <h3 className="text-sm font-bold text-white">
+                Notification Center
               </h3>
-              <p className="text-[11px] text-slate-500 font-medium">
-                Automated AI Agent alerts & condition triggers
+              <p className="text-[11px] text-neutral-400">
+                AI Agent triggers & real-time telemetry
               </p>
             </div>
           </div>
@@ -111,14 +109,14 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
             {activeTab === 'feed' && (
               <button
                 onClick={onMarkAllAsRead}
-                className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors px-2.5 py-1 rounded-full hover:bg-indigo-50"
+                className="text-[11px] font-medium text-neutral-300 hover:text-white transition-colors px-2.5 py-1 rounded-md bg-[#14141C] hover:bg-[#1C1C26] border border-white/10"
               >
-                Mark all read
+                Mark read
               </button>
             )}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+              className="p-1 rounded-md text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -126,51 +124,51 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center bg-slate-100 p-1 border-b border-slate-200">
+        <div className="flex items-center bg-[#08080C] p-1 border-b border-white/5 text-xs">
           <button
             onClick={() => setActiveTab('feed')}
-            className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all text-center ${
-              activeTab === 'feed' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            className={`flex-1 py-1.5 rounded-md font-medium transition-all text-center ${
+              activeTab === 'feed' ? 'bg-white text-black font-semibold' : 'text-neutral-400 hover:text-white'
             }`}
           >
             Live Feed ({notifications.filter(n => !n.read).length})
           </button>
           <button
             onClick={() => setActiveTab('preferences')}
-            className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1 ${
-              activeTab === 'preferences' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            className={`flex-1 py-1.5 rounded-md font-medium transition-all text-center flex items-center justify-center gap-1.5 ${
+              activeTab === 'preferences' ? 'bg-white text-black font-semibold' : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Sliders className="w-3 h-3 text-indigo-600" />
+            <Sliders className="w-3 h-3" />
             <span>Preferences</span>
           </button>
           <button
             onClick={() => setActiveTab('custom_rules')}
-            className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-1 ${
-              activeTab === 'custom_rules' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            className={`flex-1 py-1.5 rounded-md font-medium transition-all text-center flex items-center justify-center gap-1.5 ${
+              activeTab === 'custom_rules' ? 'bg-white text-black font-semibold' : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Settings2 className="w-3 h-3 text-indigo-600" />
-            <span>Custom Rules ({customAlerts.length})</span>
+            <Settings2 className="w-3 h-3" />
+            <span>Rules ({customAlerts.length})</span>
           </button>
         </div>
 
         {/* Tab 1: Live Feed */}
         {activeTab === 'feed' && (
-          <div className="flex-1 overflow-y-auto p-4 space-y-2.5 divide-y divide-slate-100">
-            {/* Quick Test Alert Simulation Trigger */}
-            <div className="p-3 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between gap-2">
+          <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+            {/* Quick Test Alert Simulation */}
+            <div className="p-3 rounded-xl bg-[#0E0E14] border border-white/5 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
-                <span className="text-xs text-indigo-900 font-semibold">
-                  Test the real-time AI alert dispatcher
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span className="text-xs text-neutral-300 font-medium">
+                  Test AI alert dispatcher
                 </span>
               </div>
               <button
                 onClick={onTriggerTestAlert}
-                className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-2xs transition-all shrink-0"
+                className="px-3 py-1 rounded-md text-xs font-semibold bg-white text-black hover:bg-neutral-200 transition-all shrink-0"
               >
-                Trigger Live Alert
+                Trigger
               </button>
             </div>
 
@@ -178,20 +176,22 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               notifications.map((notif) => (
                 <div
                   key={notif.id}
-                  className={`pt-2.5 first:pt-0 p-3 rounded-2xl transition-all ${
-                    notif.read ? 'opacity-75 bg-white' : 'bg-indigo-50/40 border border-indigo-100/70 shadow-2xs'
+                  className={`p-3 rounded-xl transition-all border ${
+                    notif.read 
+                      ? 'opacity-60 bg-[#0E0E14] border-white/5' 
+                      : 'bg-[#121218] border-white/10'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">
-                    <div className="p-2 rounded-full bg-white border border-slate-200 shadow-2xs mt-0.5 shrink-0">
+                    <div className="p-1.5 rounded-lg bg-[#08080C] border border-white/10 mt-0.5 shrink-0">
                       {getIcon(notif.type)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <h4 className="text-xs font-bold text-slate-900 truncate">{notif.title}</h4>
-                        <span className="text-[10px] text-slate-400 font-mono shrink-0">{notif.timestamp}</span>
+                        <h4 className="text-xs font-semibold text-white truncate">{notif.title}</h4>
+                        <span className="text-[10px] text-neutral-500 font-mono shrink-0">{notif.timestamp}</span>
                       </div>
-                      <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                      <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
                         {notif.message}
                       </p>
                       {notif.ticker && (
@@ -200,7 +200,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                             onSelectStock(notif.ticker!);
                             onClose();
                           }}
-                          className="mt-1.5 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                          className="mt-1.5 text-[11px] font-medium text-cyan-400 hover:text-white flex items-center gap-1 transition-colors font-mono"
                         >
                           <span>Analyze {notif.ticker}</span>
                           <ArrowRight className="w-3 h-3" />
@@ -211,45 +211,41 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 </div>
               ))
             ) : (
-              <div className="p-8 text-center text-xs text-slate-400">
+              <div className="p-8 text-center text-xs text-neutral-500">
                 No active notifications.
               </div>
             )}
           </div>
         )}
 
-        {/* Tab 2: Custom Alert Preferences */}
+        {/* Tab 2: Alert Preferences */}
         {activeTab === 'preferences' && (
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
-            <div className="text-xs text-slate-500 font-medium">
-              Configure which market conditions and AI detective discoveries trigger in-app notifications:
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 text-xs">
+            <div className="text-neutral-400">
+              Configure conditions and AI detective alerts:
             </div>
 
-            {/* Toggles */}
-            <div className="space-y-3">
-              
-              {/* Price Volatility */}
-              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="p-3 rounded-xl bg-[#0E0E14] border border-white/5 flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-slate-800">Significant Price Volatility</div>
-                  <div className="text-[11px] text-slate-500">
-                    Triggers when stock moves {alertPreferences.priceThresholdPct}% in a single session
+                  <div className="font-semibold text-white">Significant Price Volatility</div>
+                  <div className="text-[11px] text-neutral-400">
+                    Triggers when stock moves {alertPreferences.priceThresholdPct}% in a session
                   </div>
                 </div>
                 <input
                   type="checkbox"
                   checked={alertPreferences.priceVolatility}
                   onChange={(e) => onUpdatePreferences({ ...alertPreferences, priceVolatility: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 rounded-md focus:ring-indigo-500"
+                  className="w-4 h-4 rounded focus:ring-0 accent-white"
                 />
               </div>
 
-              {/* Price Threshold Slider */}
               {alertPreferences.priceVolatility && (
-                <div className="pl-3 pr-3 pb-1">
-                  <div className="flex justify-between text-[11px] text-slate-500 font-bold mb-1">
-                    <span>Trigger Threshold:</span>
-                    <span className="text-indigo-600 font-mono">±{alertPreferences.priceThresholdPct}%</span>
+                <div className="px-3 pb-1">
+                  <div className="flex justify-between text-[11px] text-neutral-400 font-medium mb-1">
+                    <span>Threshold:</span>
+                    <span className="text-cyan-300 font-mono">±{alertPreferences.priceThresholdPct}%</span>
                   </div>
                   <input
                     type="range"
@@ -258,48 +254,45 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     step="0.5"
                     value={alertPreferences.priceThresholdPct}
                     onChange={(e) => onUpdatePreferences({ ...alertPreferences, priceThresholdPct: Number(e.target.value) })}
-                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                    className="w-full h-1.5 bg-[#181822] rounded-lg appearance-none cursor-pointer accent-white"
                   />
                 </div>
               )}
 
-              {/* Technical Trend Reversals (Chart Detective) */}
-              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+              <div className="p-3 rounded-xl bg-[#0E0E14] border border-white/5 flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-slate-800">Technical Trend Shifts & Breakouts</div>
-                  <div className="text-[11px] text-slate-500">
-                    200-EMA crossovers, RSI exhaustion warnings, MACD divergences
+                  <div className="font-semibold text-white">Technical Shifts & Breakouts</div>
+                  <div className="text-[11px] text-neutral-400">
+                    200-EMA crossovers, RSI alerts, MACD triggers
                   </div>
                 </div>
                 <input
                   type="checkbox"
                   checked={alertPreferences.trendReversals}
                   onChange={(e) => onUpdatePreferences({ ...alertPreferences, trendReversals: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 rounded-md focus:ring-indigo-500"
+                  className="w-4 h-4 accent-white"
                 />
               </div>
 
-              {/* SEBI Filings (Rulebook Detective) */}
-              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+              <div className="p-3 rounded-xl bg-[#0E0E14] border border-white/5 flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-slate-800">SEBI Regulatory & Audit Disclosures</div>
-                  <div className="text-[11px] text-slate-500">
-                    New filings, promoter pledge changes, and auditor note updates
+                  <div className="font-semibold text-white">SEBI Regulatory Disclosures</div>
+                  <div className="text-[11px] text-neutral-400">
+                    Filings, promoter pledge updates, auditor notes
                   </div>
                 </div>
                 <input
                   type="checkbox"
                   checked={alertPreferences.sebiFilings}
                   onChange={(e) => onUpdatePreferences({ ...alertPreferences, sebiFilings: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 rounded-md focus:ring-indigo-500"
+                  className="w-4 h-4 accent-white"
                 />
               </div>
 
-              {/* Google Trends Surges */}
-              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+              <div className="p-3 rounded-xl bg-[#0E0E14] border border-white/5 flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-slate-800">Google Trends Search Spikes</div>
-                  <div className="text-[11px] text-slate-500">
+                  <div className="font-semibold text-white">Google Trends Search Spikes</div>
+                  <div className="text-[11px] text-neutral-400">
                     Triggers when search score exceeds {alertPreferences.googleTrendsThreshold}/100
                   </div>
                 </div>
@@ -307,49 +300,29 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   type="checkbox"
                   checked={alertPreferences.googleTrendsSurges}
                   onChange={(e) => onUpdatePreferences({ ...alertPreferences, googleTrendsSurges: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 rounded-md focus:ring-indigo-500"
+                  className="w-4 h-4 accent-white"
                 />
               </div>
-
-              {/* In-app Toast Banners */}
-              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-slate-800">In-App Floating Toast Banners</div>
-                  <div className="text-[11px] text-slate-500">
-                    Display realtime alerts on the screen top-right corner
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={alertPreferences.toastNotifications}
-                  onChange={(e) => onUpdatePreferences({ ...alertPreferences, toastNotifications: e.target.checked })}
-                  className="w-4 h-4 text-indigo-600 rounded-md focus:ring-indigo-500"
-                />
-              </div>
-
             </div>
           </div>
         )}
 
-        {/* Tab 3: Custom Alert Rules Builder */}
+        {/* Tab 3: Custom Alert Rules */}
         {activeTab === 'custom_rules' && (
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
-            
-            {/* Create Rule Form */}
-            <form onSubmit={handleCreateRule} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-              <h4 className="font-bold text-slate-900 mb-2 flex items-center gap-1.5">
-                <Plus className="w-3.5 h-3.5 text-indigo-600" />
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 text-xs">
+            <form onSubmit={handleCreateRule} className="p-3.5 rounded-xl bg-[#0E0E14] border border-white/10">
+              <h4 className="font-semibold text-white mb-2.5 flex items-center gap-1.5">
+                <Plus className="w-3.5 h-3.5 text-cyan-400" />
                 Add Custom Price / Indicator Trigger
               </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
-                {/* Stock Ticker Select */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Stock</label>
+                  <label className="text-[10px] font-medium text-neutral-400 uppercase">Stock</label>
                   <select
                     value={newTicker}
                     onChange={(e) => setNewTicker(e.target.value)}
-                    className="w-full mt-1 p-2 rounded-xl bg-white border border-slate-200 font-bold text-slate-800 text-xs"
+                    className="w-full mt-1 p-2 rounded-lg bg-[#08080C] border border-white/10 text-white font-mono text-xs"
                   >
                     {stocks.map((s) => (
                       <option key={s.ticker} value={s.ticker}>{s.ticker}</option>
@@ -357,13 +330,12 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   </select>
                 </div>
 
-                {/* Condition */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Condition</label>
+                  <label className="text-[10px] font-medium text-neutral-400 uppercase">Condition</label>
                   <select
                     value={newCondition}
                     onChange={(e) => setNewCondition(e.target.value as any)}
-                    className="w-full mt-1 p-2 rounded-xl bg-white border border-slate-200 font-bold text-slate-800 text-xs"
+                    className="w-full mt-1 p-2 rounded-lg bg-[#08080C] border border-white/10 text-white font-medium text-xs"
                   >
                     <option value="PRICE_ABOVE">Price Above (₹)</option>
                     <option value="PRICE_BELOW">Price Below (₹)</option>
@@ -373,14 +345,13 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   </select>
                 </div>
 
-                {/* Target Value */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">Target Value</label>
+                  <label className="text-[10px] font-medium text-neutral-400 uppercase">Target</label>
                   <input
                     type="number"
                     value={newTargetValue}
                     onChange={(e) => setNewTargetValue(Number(e.target.value))}
-                    className="w-full mt-1 p-2 rounded-xl bg-white border border-slate-200 font-mono font-bold text-slate-800 text-xs"
+                    className="w-full mt-1 p-2 rounded-lg bg-[#08080C] border border-white/10 font-mono text-white text-xs"
                     placeholder="e.g. 950"
                   />
                 </div>
@@ -388,40 +359,38 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all shadow-2xs"
+                className="w-full py-2 rounded-lg bg-white text-black font-semibold text-xs transition-all"
               >
                 Save Alert Rule
               </button>
             </form>
 
-            {/* Active Rules List */}
             <div>
-              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
-                Active Custom Conditions ({customAlerts.length})
+              <div className="text-[11px] font-medium text-neutral-400 uppercase tracking-wider mb-2">
+                Active Conditions ({customAlerts.length})
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {customAlerts.map((rule) => (
                   <div
                     key={rule.id}
-                    className="p-2.5 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-between gap-2 shadow-2xs"
+                    className="p-2.5 rounded-lg bg-[#0E0E14] border border-white/5 flex items-center justify-between gap-2"
                   >
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-extrabold text-indigo-700 text-xs">{rule.ticker}</span>
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                        <span className="font-bold text-white text-xs font-mono">{rule.ticker}</span>
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/5 text-neutral-300">
                           {rule.condition.replace(/_/g, ' ')}
                         </span>
                       </div>
-                      <div className="text-[11px] text-slate-600 mt-0.5">
-                        Target: <strong className="font-mono text-slate-900">{rule.targetValue}</strong>
+                      <div className="text-[11px] text-neutral-400 mt-0.5 font-mono">
+                        Target: <strong className="text-white">{rule.targetValue}</strong>
                       </div>
                     </div>
 
                     <button
                       onClick={() => onDeleteCustomAlert(rule.id)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors"
-                      title="Delete rule"
+                      className="p-1 text-neutral-500 hover:text-rose-400 hover:bg-white/5 rounded transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -429,7 +398,6 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 ))}
               </div>
             </div>
-
           </div>
         )}
 

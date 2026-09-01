@@ -4,6 +4,10 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Lenis from 'lenis';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
 import { Navbar } from './components/Navbar';
 import { MarketTicker } from './components/MarketTicker';
 import { StockOverview } from './components/StockOverview';
@@ -19,11 +23,12 @@ import { ProofCitationsDrawer } from './components/ProofCitationsDrawer';
 import { AgentChatbot } from './components/AgentChatbot';
 import { SystemArchitectureModal } from './components/SystemArchitectureModal';
 import { NotificationCenter } from './components/NotificationCenter';
+import { Canvas3DScene } from './components/Canvas3DScene';
+import { CustomCursor } from './components/CustomCursor';
 
 import { 
   StockData, 
   DetectiveOutput, 
-  BossSynthesis, 
   RiskProfileType, 
   UserProfile, 
   PortfolioHolding,
@@ -42,12 +47,15 @@ import {
   INITIAL_CUSTOM_ALERTS
 } from './data/stocks';
 import { fetchStocks, fetchLiveStock, runMultiAgentAnalysis, auditUserPortfolio, AnalysisResponse } from './services/api';
-import { Bot, Sparkles, Activity, ShieldCheck, Newspaper, Shield, Layers, HelpCircle, Bell, X, ArrowRight } from 'lucide-react';
+import { Bot, Sparkles, Bell, X, ArrowRight, Layers, ArrowDown } from 'lucide-react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function App() {
   const [stocks, setStocks] = useState<StockData[]>(POPULAR_STOCKS);
   const [activeTicker, setActiveTicker] = useState<string>('TATAMOTORS');
   const [isRefreshingLive, setIsRefreshingLive] = useState<boolean>(false);
+  const [scrollProgress, setScrollProgress] = useState<number>(0);
   
   // Persisted Risk Profile
   const [riskProfile, setRiskProfile] = useState<RiskProfileType>(() => {
@@ -57,7 +65,7 @@ export default function App() {
         return saved as RiskProfileType;
       }
     } catch (e) {
-      // localStorage not available
+      // ignore
     }
     return 'conservative';
   });
@@ -115,6 +123,45 @@ export default function App() {
   // Floating Toast Notification State
   const [activeToast, setActiveToast] = useState<NotificationItem | null>(null);
   const [systemMetrics, setSystemMetrics] = useState<SystemMetrics>(INITIAL_SYSTEM_METRICS);
+
+  const mainContainerRef = useRef<HTMLDivElement>(null);
+
+  // Initialize Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.0,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // Track scroll progress for 3D engine and editorial transitions
+    const handleScroll = () => {
+      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalScroll > 0) {
+        const progress = Math.min(1, Math.max(0, window.scrollY / totalScroll));
+        setScrollProgress(progress);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    lenis.on('scroll', ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      lenis.destroy();
+    };
+  }, []);
 
   // Save changes to localStorage
   useEffect(() => {
@@ -174,7 +221,7 @@ export default function App() {
       setActiveToast(newNotif);
       setTimeout(() => {
         setActiveToast((current) => (current?.id === newNotif.id ? null : current));
-      }, 6000);
+      }, 5000);
     }
   }, []);
 
@@ -228,7 +275,7 @@ export default function App() {
     executeAnalysis(activeTicker, riskProfile, degradedScenario);
   }, []);
 
-  // Periodic Market Condition Evaluator (Simulates real-time market event detector)
+  // Periodic Market Condition Evaluator
   useEffect(() => {
     const interval = setInterval(() => {
       const alerts = customAlertsRef.current;
@@ -236,7 +283,6 @@ export default function App() {
       const curSt = currentStockRef.current;
       const prefs = alertPreferencesRef.current;
 
-      // Evaluate custom user alerts
       if (alerts.length > 0) {
         const randomRule = alerts[Math.floor(Math.random() * alerts.length)];
         const targetStock = allSt.find(s => s.ticker === randomRule.ticker);
@@ -250,7 +296,6 @@ export default function App() {
         }
       }
 
-      // Check Google Trends spikes
       if (prefs.googleTrendsSurges && curSt?.googleTrends && curSt.googleTrends.searchScore >= prefs.googleTrendsThreshold) {
         if (Math.random() < 0.2) {
           pushNotification({
@@ -266,11 +311,9 @@ export default function App() {
     return () => clearInterval(interval);
   }, [pushNotification]);
 
-  // Trigger analysis when stock, risk profile, or degraded scenario changes
   const handleSelectStock = async (ticker: string) => {
     setActiveTicker(ticker);
     
-    // Check if the stock is not yet loaded in our local stocks state
     const existing = stocks.find(s => s.ticker.toUpperCase() === ticker.toUpperCase());
     if (!existing) {
       try {
@@ -313,7 +356,7 @@ export default function App() {
 
     pushNotification({
       title: `Risk Profile Updated: ${profile.toUpperCase()}`,
-      message: `The Boss AI Synthesizer has recalibrated recommendation weights and stop-loss limits for ${profile} allocation.`,
+      message: `The Boss AI Synthesizer recalibrated recommendation weights and stop-loss limits for ${profile} allocation.`,
       type: 'PORTFOLIO_ALERT'
     });
   };
@@ -324,15 +367,14 @@ export default function App() {
 
     if (scenario !== 'none') {
       pushNotification({
-        title: `Degraded Test Mode Activated: ${scenario.replace(/_/g, ' ').toUpperCase()}`,
-        message: `System successfully activated zero-hallucination guardrail for ${activeTicker}.`,
+        title: `Degraded Test Mode: ${scenario.replace(/_/g, ' ').toUpperCase()}`,
+        message: `System activated zero-hallucination guardrail for ${activeTicker}.`,
         ticker: activeTicker,
         type: 'SYSTEM_DEGRADED'
       });
     }
   };
 
-  // Update holdings and cash balance
   const handleUpdateHoldings = (newHoldings: PortfolioHolding[], cashBalance?: number) => {
     setUserProfile((prev) => {
       const updatedCash = cashBalance !== undefined ? cashBalance : prev.cashBalance;
@@ -352,7 +394,6 @@ export default function App() {
     });
   };
 
-  // Update profile name, experience level, risk profile
   const handleUpdateProfile = (updatedFields: Partial<UserProfile>) => {
     setUserProfile((prev) => {
       const next = { ...prev, ...updatedFields };
@@ -372,7 +413,6 @@ export default function App() {
     }
   };
 
-  // Run full portfolio audit with the 3 AI Detectives
   const handleAuditPortfolio = async () => {
     setIsAuditingPortfolio(true);
     try {
@@ -422,7 +462,7 @@ export default function App() {
 
   const handleTriggerTestAlert = () => {
     pushNotification({
-      title: `⚡ Live Test Alert: ${currentStock.ticker}`,
+      title: `Live Test Alert: ${currentStock.ticker}`,
       message: `Price moved +${(Math.random() * 2 + 1).toFixed(2)}% in high-volume trade. Technical & News Detectives confirmed alignment.`,
       ticker: currentStock.ticker,
       type: 'SIGNAL_BREAKOUT'
@@ -439,9 +479,21 @@ export default function App() {
     : undefined;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="relative min-h-screen bg-[#050505] text-[#EDEDED] antialiased flex flex-col font-sans selection:bg-white/20 selection:text-white">
       
-      {/* Top Navigation */}
+      {/* Dynamic 3D Background Scene */}
+      <Canvas3DScene 
+        scrollProgress={scrollProgress} 
+        currentStock={currentStock} 
+      />
+
+      {/* Bespoke Precision Custom Cursor */}
+      <CustomCursor />
+
+      {/* Static Noise Texture Overlay */}
+      <div className="noise-overlay" />
+
+      {/* Top Navigation Bar */}
       <Navbar
         currentStock={currentStock}
         allStocks={stocks}
@@ -461,143 +513,297 @@ export default function App() {
         activeTicker={activeTicker}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Main Interactive Scrollytelling Container */}
+      <main ref={mainContainerRef} className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         
-        {/* Intro Mission Banner for Retail Investors */}
-        <div className="mb-6 bg-slate-900 rounded-2xl p-5 sm:p-6 text-white shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-slate-800">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-bold px-3 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3 text-indigo-400" />
-                Hedge-Fund Grade Intelligence for Everyone
-              </span>
-              <span className="text-xs text-slate-400 font-mono hidden sm:inline">• Under 60 Seconds</span>
-            </div>
-            <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-white">
-              3 AI Detectives Protecting Your Money in Real-Time
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
-              Big hedge funds deploy teams of analysts with supercomputers. NiftyMind gives you 3 specialized AI robots running parallel technical, regulatory (SEBI RAG), and news synthesis to make safe, grounded choices.
-            </p>
+        {/* Floating Scrollytelling Scene Navigator (Desktop HUD) */}
+        <aside aria-label="Scrollytelling Scenes" className="fixed right-6 top-1/2 -translate-y-1/2 z-30 hidden xl:flex flex-col gap-2.5 bg-[#0A0A0E]/90 p-2.5 rounded-2xl border border-white/10">
+          <div className="text-[9px] font-mono text-neutral-400 uppercase tracking-wider px-2 pb-1 border-b border-white/10 text-center">
+            Scenes
           </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => setIsArchitectureModalOpen(true)}
-              className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-full text-xs font-bold transition-all border border-slate-700 shadow-2xs"
-            >
-              How It Works
-            </button>
-            <button
-              onClick={() => setIsChatOpen(true)}
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-xs font-bold transition-all shadow-md shadow-indigo-500/20 flex items-center gap-1.5 ring-2 ring-indigo-400/20"
-            >
-              <Bot className="w-4 h-4" />
-              <span>Ask Detectives</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Stock Overview Header with Degraded Simulator & Audit CTA */}
-        <StockOverview
-          stock={currentStock}
-          isAnalyzing={isAnalyzing}
-          onRunAnalysis={() => executeAnalysis(activeTicker, riskProfile, degradedScenario)}
-          degradedScenario={degradedScenario}
-          onChangeDegradedScenario={handleChangeDegradedScenario}
-          riskProfile={riskProfile}
-          lastAnalyzedTime={lastAnalyzedTime}
-          onRefreshLiveFeed={handleRefreshLiveFeed}
-          isRefreshingLive={isRefreshingLive}
-        />
-
-        {/* Interactive Live Price Chart with Zoom, Pan, Multi-indicators & Guardrails */}
-        <PriceChart 
-          stock={currentStock} 
-          targetPrice={targetPriceNum}
-          stopLossPrice={stopLossPriceNum}
-        />
-
-        {/* Google Trends Real-Time Pulse for Active Stock */}
-        <GoogleTrendsRadar
-          stock={currentStock}
-          onSelectQuery={() => setIsChatOpen(true)}
-        />
-
-        {/* 3 AI DETECTIVES (THE ROBOTS THINKING IN PARALLEL) */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black uppercase tracking-wider text-indigo-600 flex items-center gap-1">
-                  <Bot className="w-3.5 h-3.5" />
-                  Autonomous Multi-Agent Swarm
+          {[
+            { id: 'scene-1', num: '01', title: 'Swarm Active', range: [0, 0.20] },
+            { id: 'scene-2', num: '02', title: 'Data Convergence', range: [0.20, 0.40] },
+            { id: 'scene-3', num: '03', title: 'Deep Market Analysis', range: [0.40, 0.65] },
+            { id: 'scene-4', num: '04', title: 'External Context', range: [0.65, 0.85] },
+            { id: 'scene-5', num: '05', title: 'Action & Synthesis', range: [0.85, 1.0] },
+          ].map((scene) => {
+            const isActive = scrollProgress >= scene.range[0] && scrollProgress <= scene.range[1];
+            return (
+              <a
+                key={scene.id}
+                href={`#${scene.id}`}
+                className={`group flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                  isActive
+                    ? 'bg-white/10 text-white font-semibold'
+                    : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full transition-all ${isActive ? 'bg-cyan-400 scale-125' : 'bg-neutral-600 group-hover:bg-neutral-400'}`} />
+                <span>{scene.num}</span>
+                <span className="hidden group-hover:inline text-[10px] whitespace-nowrap text-neutral-300 font-sans pl-1">
+                  {scene.title}
                 </span>
+              </a>
+            );
+          })}
+        </aside>
+
+        {/* =========================================================================
+            SCENE 1: SWARM ACTIVE (Scroll 0% - 20%)
+            ========================================================================= */}
+        <section id="scene-1" className="relative pt-2 pb-6 scroll-mt-24">
+          <div className="bg-[#0A0A0E] p-6 sm:p-10 rounded-2xl border border-white/10 relative overflow-hidden">
+            <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+              <div className="max-w-3xl space-y-4">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <span className="px-2.5 py-1 text-xs font-semibold text-cyan-300 bg-cyan-500/10 rounded-md border border-cyan-500/20 flex items-center gap-1.5 font-mono">
+                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                    SCENE 01 • SWARM ACTIVE
+                  </span>
+                  <span className="text-xs text-neutral-400 font-mono">
+                    3 Autonomous AI Detectives • Real-time Parallel Execution
+                  </span>
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.12]">
+                  3 AI Detectives Protecting <br />
+                  <span className="text-neutral-400 font-normal">
+                    Your Capital in Real-Time.
+                  </span>
+                </h1>
+
+                <p className="text-sm sm:text-base text-neutral-300 leading-relaxed max-w-2xl font-normal">
+                  NiftyMind orchestrates three parallel AI specialists: <strong>Robot 01 (Technical Chartist)</strong>, <strong>Robot 02 (SEBI LODR RAG)</strong>, and <strong>Robot 03 (Macro Sentiment)</strong>. They audit live price action, filings, and public search interest simultaneously.
+                </p>
+
+                {/* 3 Detectives Spatial Status Badges */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3">
+                  <div className="bg-[#0E0E14] p-3 rounded-xl border border-cyan-500/20 flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0 animate-pulse" />
+                    <div>
+                      <div className="text-[10px] font-mono text-cyan-400">AGENT 01</div>
+                      <div className="text-xs font-semibold text-white">Chart Detective</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#0E0E14] p-3 rounded-xl border border-emerald-500/20 flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0 animate-pulse" />
+                    <div>
+                      <div className="text-[10px] font-mono text-emerald-400">AGENT 02</div>
+                      <div className="text-xs font-semibold text-white">Rulebook RAG</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#0E0E14] p-3 rounded-xl border border-violet-500/20 flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-violet-400 shrink-0 animate-pulse" />
+                    <div>
+                      <div className="text-[10px] font-mono text-violet-400">AGENT 03</div>
+                      <div className="text-xs font-semibold text-white">Macro & Sentiment</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-extrabold text-slate-900">
-                Meet Your 3 Specialized AI Detectives
-              </h3>
+
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full sm:w-auto">
+                <button
+                  onClick={() => setIsArchitectureModalOpen(true)}
+                  className="px-5 py-2.5 rounded-lg text-xs font-medium text-neutral-200 bg-[#121218] hover:bg-[#1A1A22] border border-white/10 hover:border-white/20 transition-all text-center flex items-center justify-center gap-2 font-mono"
+                >
+                  <span>Architecture Dossier</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-neutral-400" />
+                </button>
+                <button
+                  onClick={() => setIsChatOpen(true)}
+                  className="px-5 py-2.5 rounded-lg text-xs font-semibold text-black bg-white hover:bg-neutral-200 transition-all flex items-center justify-center gap-2"
+                >
+                  <Bot className="w-4 h-4 text-black" />
+                  <span>Ask AI Detectives</span>
+                </button>
+              </div>
             </div>
-            <div className="text-xs font-semibold text-slate-500 flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-              <span>Running simultaneously on live feeds</span>
+
+            {/* Status Footer */}
+            <div className="mt-8 pt-5 border-t border-white/5 flex items-center justify-between text-xs text-neutral-400">
+              <span className="font-mono">Active Target: <strong className="text-white font-medium">{currentStock.name} ({currentStock.ticker})</strong></span>
+              <a href="#scene-2" className="flex items-center gap-1.5 text-neutral-400 hover:text-white transition-colors">
+                <span>Scroll down to Scene 02 (Data Convergence)</span>
+                <ArrowDown className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            SCENE 2: DATA CONVERGENCE (Scroll 20% - 40%)
+            ========================================================================= */}
+        <section id="scene-2" className="space-y-6 scroll-mt-24">
+          <div className="flex items-center justify-between gap-3 pb-2 border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-cyan-400 px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+                SCENE 02 • DATA CONVERGENCE
+              </span>
+              <span className="text-xs text-neutral-400 font-mono hidden sm:inline">
+                Real-Time Exchange Telemetry & Resilience Console
+              </span>
+            </div>
+            <div className="text-xs font-mono text-neutral-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>NSE: Live Stream Active</span>
             </div>
           </div>
 
-          {/* Detectives Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {analysisResult ? (
-              <>
-                <AgentDetectiveCard
-                  detective={analysisResult.detectives.chart}
-                  onInspectReasoning={(d) => setActiveReasoningDetective(d)}
-                  onViewCitations={(d) => setActiveCitationsDetective(d)}
-                />
-                <AgentDetectiveCard
-                  detective={analysisResult.detectives.rulebook}
-                  onInspectReasoning={(d) => setActiveReasoningDetective(d)}
-                  onViewCitations={(d) => setActiveCitationsDetective(d)}
-                />
-                <AgentDetectiveCard
-                  detective={analysisResult.detectives.news}
-                  onInspectReasoning={(d) => setActiveReasoningDetective(d)}
-                  onViewCitations={(d) => setActiveCitationsDetective(d)}
-                />
-              </>
-            ) : (
-              <div className="col-span-3 p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-sm">
-                Initializing AI Detectives...
+          <StockOverview
+            stock={currentStock}
+            isAnalyzing={isAnalyzing}
+            onRunAnalysis={() => executeAnalysis(activeTicker, riskProfile, degradedScenario)}
+            degradedScenario={degradedScenario}
+            onChangeDegradedScenario={handleChangeDegradedScenario}
+            riskProfile={riskProfile}
+            lastAnalyzedTime={lastAnalyzedTime}
+            onRefreshLiveFeed={handleRefreshLiveFeed}
+            isRefreshingLive={isRefreshingLive}
+          />
+        </section>
+
+        {/* =========================================================================
+            SCENE 3: DEEP MARKET ANALYSIS - CHART DETECTIVE (Scroll 40% - 65%)
+            ========================================================================= */}
+        <section id="scene-3" className="space-y-6 scroll-mt-24">
+          <div className="flex items-center justify-between gap-3 pb-2 border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-cyan-400 px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+                SCENE 03 • DEEP MARKET ANALYSIS
+              </span>
+              <span className="text-xs text-neutral-400 font-mono hidden sm:inline">
+                Robot 01 Technical Projection & Volumetric Indicators
+              </span>
+            </div>
+            {analysisResult && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-semibold">
+                  CONFIDENCE: {analysisResult.detectives.chart.confidenceScore}% ({analysisResult.detectives.chart.verdict})
+                </span>
               </div>
             )}
           </div>
-        </div>
 
-        {/* THE BOSS AI (SYNTHESIS & PERSONALIZATION ENGINE) */}
-        {analysisResult && (
-          <BossSynthesisView
-            synthesis={analysisResult.synthesis}
+          <PriceChart 
+            stock={currentStock} 
+            targetPrice={targetPriceNum}
+            stopLossPrice={stopLossPriceNum}
+          />
+        </section>
+
+        {/* =========================================================================
+            SCENE 4: EXTERNAL CONTEXT & SWARM MATRIX (Scroll 65% - 85%)
+            ========================================================================= */}
+        <section id="scene-4" className="space-y-8 scroll-mt-24">
+          <div className="flex items-center justify-between gap-3 pb-2 border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-violet-400 px-2 py-0.5 rounded bg-violet-500/10 border border-violet-500/20">
+                SCENE 04 • EXTERNAL CONTEXT & SWARM MATRIX
+              </span>
+              <span className="text-xs text-neutral-400 font-mono hidden sm:inline">
+                Google Trends Search Pulse & 3 Parallel Domain Experts
+              </span>
+            </div>
+            <span className="text-xs text-neutral-400 font-mono">
+              Grounding: SEBI LODR + Google Search
+            </span>
+          </div>
+
+          {/* Google Trends Regional Radar */}
+          <GoogleTrendsRadar
             stock={currentStock}
+            onSelectQuery={() => setIsChatOpen(true)}
+          />
+
+          {/* 3 AI Detectives Swarm Cards */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                <Bot className="w-4 h-4 text-cyan-400" />
+                <span>Parallel Detective Telemetry</span>
+              </h3>
+              <span className="text-xs font-mono text-neutral-400">
+                Click "Thinking Trace" or "Proof" for verifiable audit logs
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {analysisResult ? (
+                <>
+                  <AgentDetectiveCard
+                    detective={analysisResult.detectives.chart}
+                    onInspectReasoning={(d) => setActiveReasoningDetective(d)}
+                    onViewCitations={(d) => setActiveCitationsDetective(d)}
+                  />
+                  <AgentDetectiveCard
+                    detective={analysisResult.detectives.rulebook}
+                    onInspectReasoning={(d) => setActiveReasoningDetective(d)}
+                    onViewCitations={(d) => setActiveCitationsDetective(d)}
+                  />
+                  <AgentDetectiveCard
+                    detective={analysisResult.detectives.news}
+                    onInspectReasoning={(d) => setActiveReasoningDetective(d)}
+                    onViewCitations={(d) => setActiveCitationsDetective(d)}
+                  />
+                </>
+              ) : (
+                <div className="col-span-3 p-16 text-center bg-[#0A0A0E] rounded-2xl border border-white/10 text-neutral-400 text-sm">
+                  <div className="w-6 h-6 rounded-full border-2 border-neutral-400 border-t-white animate-spin mx-auto mb-3" />
+                  Initializing parallel AI detective telemetry...
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            SCENE 5: ACTION & PORTFOLIO SYNTHESIS (Scroll 85% - 100%)
+            ========================================================================= */}
+        <section id="scene-5" className="space-y-8 scroll-mt-24">
+          <div className="flex items-center justify-between gap-3 pb-2 border-b border-white/5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-amber-400 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+                SCENE 05 • ACTION & PORTFOLIO SYNTHESIS
+              </span>
+              <span className="text-xs text-neutral-400 font-mono hidden sm:inline">
+                Boss AI Decision Matrix & Multi-Asset Portfolio Safeguards
+              </span>
+            </div>
+            <span className="text-xs font-mono text-emerald-400">
+              Personalized for {riskProfile.toUpperCase()} Investor
+            </span>
+          </div>
+
+          {/* Boss AI Synthesis View */}
+          {analysisResult && (
+            <BossSynthesisView
+              synthesis={analysisResult.synthesis}
+              stock={currentStock}
+              riskProfile={riskProfile}
+              onChangeRiskProfile={handleChangeRiskProfile}
+            />
+          )}
+
+          {/* Live Market Trends & Sector Heatmap */}
+          <LiveTrendsPanel onSelectStockByTicker={handleSelectStock} />
+
+          {/* User Portfolio Watchlist & Holdings Audit */}
+          <PortfolioWatchlist
+            userProfile={userProfile}
+            allStocks={stocks}
+            onSelectStock={handleSelectStock}
+            onAuditPortfolio={handleAuditPortfolio}
+            isAuditingPortfolio={isAuditingPortfolio}
+            onUpdateHoldings={handleUpdateHoldings}
+            onUpdateProfile={handleUpdateProfile}
             riskProfile={riskProfile}
             onChangeRiskProfile={handleChangeRiskProfile}
           />
-        )}
-
-        {/* Live Market Trends, Sector Heatmap & Google Trends Leaderboard */}
-        <LiveTrendsPanel onSelectStockByTicker={handleSelectStock} />
-
-        {/* User Portfolio & Holdings Watchlist */}
-        <PortfolioWatchlist
-          userProfile={userProfile}
-          allStocks={stocks}
-          onSelectStock={handleSelectStock}
-          onAuditPortfolio={handleAuditPortfolio}
-          isAuditingPortfolio={isAuditingPortfolio}
-          onUpdateHoldings={handleUpdateHoldings}
-          onUpdateProfile={handleUpdateProfile}
-          riskProfile={riskProfile}
-          onChangeRiskProfile={handleChangeRiskProfile}
-        />
+        </section>
 
       </main>
 
@@ -613,21 +819,21 @@ export default function App() {
 
       {/* Floating Toast Notification Banner */}
       {activeToast && (
-        <div className="fixed top-20 right-4 sm:right-6 z-50 max-w-sm w-full bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-700 flex items-start gap-3 animate-in slide-in-from-top-4 duration-200">
-          <div className="p-2 bg-indigo-600 rounded-full shrink-0 mt-0.5">
+        <div className="fixed top-20 right-4 sm:right-6 z-50 max-w-sm w-full bg-[#0E0E14] text-white p-4 rounded-xl border border-white/10 flex items-start gap-3 animate-fade-in shadow-xl">
+          <div className="p-2 bg-white/10 rounded-lg shrink-0 mt-0.5">
             <Bell className="w-4 h-4 text-white" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-1">
-              <h4 className="text-xs font-bold text-white truncate">{activeToast.title}</h4>
+              <h4 className="text-xs font-semibold text-white truncate">{activeToast.title}</h4>
               <button
                 onClick={() => setActiveToast(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-neutral-400 hover:text-white"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
-            <p className="text-[11px] text-slate-300 mt-1 leading-snug">
+            <p className="text-[11px] text-neutral-300 mt-1 leading-snug">
               {activeToast.message}
             </p>
             {activeToast.ticker && (
@@ -636,7 +842,7 @@ export default function App() {
                   handleSelectStock(activeToast.ticker!);
                   setActiveToast(null);
                 }}
-                className="mt-2 text-[10px] font-bold text-indigo-300 hover:text-white flex items-center gap-1"
+                className="mt-2 text-[10px] font-semibold text-cyan-300 hover:text-white flex items-center gap-1 font-mono"
               >
                 <span>Switch to {activeToast.ticker}</span>
                 <ArrowRight className="w-3 h-3" />
@@ -685,36 +891,36 @@ export default function App() {
         stocks={stocks}
       />
 
-      {/* Floating Chat Trigger Button for Mobile/Convenience */}
+      {/* Floating Chat Trigger Button */}
       {!isChatOpen && (
         <button
           onClick={() => setIsChatOpen(true)}
-          className="fixed bottom-6 right-6 z-40 bg-indigo-600 hover:bg-indigo-700 text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-xl shadow-indigo-500/25 flex items-center gap-2 text-xs font-bold ring-4 ring-indigo-500/10 active:scale-95 transition-all"
+          className="fixed bottom-6 right-6 z-40 bg-[#121218] hover:bg-[#1A1A24] text-white p-3 sm:px-4 sm:py-3 rounded-full border border-white/15 flex items-center gap-2 text-xs font-semibold active:scale-95 transition-all shadow-lg"
         >
-          <Bot className="w-5 h-5 text-white" />
+          <Bot className="w-4 h-4 text-cyan-400" />
           <span className="hidden sm:inline">Ask AI Detectives</span>
         </button>
       )}
 
-      {/* Systematic Geometric Balance Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6 text-xs text-slate-500">
+      {/* Obsidian-Themed Footer */}
+      <footer className="relative z-10 bg-[#07070A] border-t border-white/10 py-6 text-xs text-neutral-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="font-extrabold text-slate-900">Nifty<span className="text-indigo-600">Mind</span></span>
-            <span className="text-slate-300">•</span>
-            <span className="text-slate-500 font-medium">Autonomous Multi-Agent Financial Intelligence</span>
+            <span className="font-bold text-white">NIFTY<span className="text-cyan-400">MIND</span></span>
+            <span className="text-white/20">•</span>
+            <span className="text-neutral-400">Multi-Agent Financial Intelligence Swarm</span>
           </div>
           
-          <div className="flex items-center gap-3 font-mono text-[11px]">
-            <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              System Status: ONLINE
+          <div className="flex items-center gap-3 text-[11px] flex-wrap">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              SYSTEM: ONLINE
             </span>
-            <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold">
-              Detectives Active: 3/3
+            <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-medium font-mono">
+              DETECTIVES: 3/3 ACTIVE
             </span>
-            <span className="hidden md:inline-flex px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-medium">
-              Verified by RAG Protocol v2.1
+            <span className="hidden md:inline-flex px-2.5 py-0.5 rounded-full bg-white/5 text-neutral-400 border border-white/10 font-mono">
+              SEBI LODR RAG PROTOCOL
             </span>
           </div>
         </div>

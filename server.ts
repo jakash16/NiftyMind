@@ -166,7 +166,6 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
     agentName: 'The Chart Detective',
     agentRole: 'Technical & Momentum Scout',
     avatarIcon: 'Activity',
-    analogy: 'Like a sports scout clocking a runner sprint speed: watching if the price is accelerating smoothly or running out of breath (exhaustion).',
     summary: chartSummary,
     verdict: chartVerdict,
     confidenceScore: chartConfidence,
@@ -175,7 +174,7 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
       'MACD Histogram': stock.macd.histogram,
       'EMA 20 / EMA 200': `₹${stock.ema20} / ₹${stock.ema200}`,
       'Volume Surge Ratio': `${(stock.volume / stock.avgVolume).toFixed(2)}x`,
-      'Sprint vs Exhaustion Index': stock.rsi14 > 70 ? 'Exhaustion Warning' : 'Healthy Momentum'
+      'Momentum Index': stock.rsi14 > 70 ? 'Overbought Consolidation' : 'Stable Trend Momentum'
     },
     reasoningChain: [
       {
@@ -245,7 +244,6 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
     agentName: 'The Rulebook Detective',
     agentRole: 'SEBI Regulatory & Document RAG Agent',
     avatarIcon: 'ShieldCheck',
-    analogy: 'Like a strict librarian who reads every page of the giant boring government rulebooks to make sure the company is not hiding any secret debt or flaws.',
     summary: rulebookSummary,
     verdict: rulebookVerdict,
     confidenceScore: rulebookConfidence,
@@ -309,7 +307,6 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
     agentName: 'The News Detective',
     agentRole: 'Sentiment, Social Mood & Macro Agent',
     avatarIcon: 'Newspaper',
-    analogy: 'Like checking if all the kids and teachers at school are excited or scared about a new game before joining in.',
     summary: newsSummary,
     verdict: newsVerdict,
     confidenceScore: newsConfidence,
@@ -371,7 +368,6 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
   let riskLevel: BossSynthesis['riskLevel'] = 'LOW';
   let headline = `Favorable alignment across Chart & Regulatory pillars for ${stock.name}.`;
   let customProfileReasoning = '';
-  let beginnerAnalogy = '';
   let suggestedAction = `Accumulate in staggered tranches between ₹${(stock.currentPrice * 0.98).toFixed(1)} - ₹${stock.currentPrice.toFixed(1)}.`;
   let stopLossPrice = `₹${(stock.currentPrice * 0.94).toFixed(1)} (6% below current price)`;
   let targetPrice = `₹${(stock.currentPrice * 1.15).toFixed(1)} (15% upside target)`;
@@ -385,10 +381,9 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
       recommendationLabel = 'Strict Avoid / Wait for Clean Filings';
       recommendationColor = 'text-rose-700 bg-rose-50 border-rose-200';
       riskLevel = 'HIGH';
-      headline = 'Boss AI Safety Alert: Rulebook flags or missing disclosures detected!';
-      customProfileReasoning = 'As a Conservative Beginner, capital protection is rule #1. Even though the chart or news may look exciting, the Rulebook Detective found missing documents or risk flags. We advise staying safe on the sidelines.';
-      beginnerAnalogy = 'If you are buying a bicycle and the seller cannot find the safety certificate, you don\'t buy it today—no matter how shiny the paint looks!';
-      suggestedAction = 'Do not purchase. Wait until complete audited SEBI disclosures are submitted and verified.';
+      headline = 'Boss AI Safety Alert: Regulatory non-compliance or missing disclosures detected';
+      customProfileReasoning = 'For Conservative mandates, capital preservation is the primary constraint. Regulatory data gaps require deferring entry until complete audited disclosures are verified.';
+      suggestedAction = 'Do not purchase. Maintain capital on the sidelines until complete audited SEBI disclosures are submitted and verified.';
       positionSizeGuidance = '0% (Zero capital allocation).';
     } else {
       recommendation = 'CAUTIOUS_BUY';
@@ -396,8 +391,7 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
       recommendationColor = 'text-emerald-700 bg-emerald-50 border-emerald-200';
       riskLevel = 'LOW';
       headline = `High-conviction safety: Clean 0% promoter pledge & stable fundamentals for ${stock.name}.`;
-      customProfileReasoning = `For your Conservative profile, Robot 2 (Rulebook Detective) confirmed zero pledged shares and manageable debt. We recommend small, patient staggered buys without chasing sudden spikes.`;
-      beginnerAnalogy = `All 3 detectives checked the playground: the ground is solid, the fence is locked, and the weather is sunny. It is safe to take small steps.`;
+      customProfileReasoning = `For your Conservative profile, verified zero promoter share pledge and conservative debt-to-equity ratios satisfy safety mandates. Staggered limit orders are recommended.`;
       positionSizeGuidance = 'Allocate 3% to 5% of portfolio with strict stop-loss.';
     }
   } else if (riskProfile === 'aggressive') {
@@ -407,8 +401,7 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
       recommendationColor = 'text-blue-700 bg-blue-50 border-blue-200';
       riskLevel = 'MEDIUM';
       headline = `Accelerated momentum trade with tight stop-loss for ${stock.name}.`;
-      customProfileReasoning = `For your Aggressive Growth profile, Robot 1 (Chart Detective) identifies high volume and upward breakout velocity. You can capitalize on momentum while trailing stop-losses.`;
-      beginnerAnalogy = `The runner has strong wind behind their back and is sprinting fast—great time for a bold runner to jump in, but keep your sneakers tied tight!`;
+      customProfileReasoning = `For Aggressive mandates, strong volume velocity and moving average crossover support an active momentum positioning strategy with trailing stop-loss execution.`;
       positionSizeGuidance = 'Allocate 8% to 12% of risk capital with trailing stop-loss at 4%.';
       targetPrice = `₹${(stock.currentPrice * 1.22).toFixed(1)} (22% upside target)`;
     } else {
@@ -417,8 +410,7 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
       recommendationColor = 'text-amber-700 bg-amber-50 border-amber-200';
       riskLevel = 'MEDIUM';
       headline = 'Momentum is consolidating; wait for fresh breakout volume.';
-      customProfileReasoning = 'Even for an aggressive profile, entering during sideways consolidation ties up capital. Wait for a volume spike above recent resistance.';
-      beginnerAnalogy = 'The runner is stretching on the side of the track. Don\'t bet until they start sprinting again!';
+      customProfileReasoning = 'Price action is currently in a consolidation range. Await volume confirmation above resistance before deploying capital.';
     }
   } else {
     // Moderate
@@ -427,8 +419,7 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
     recommendationColor = 'text-emerald-700 bg-emerald-50 border-emerald-200';
     riskLevel = 'MEDIUM';
     headline = `Solid balance of technical strength and regulatory safety for ${stock.name}.`;
-    customProfileReasoning = `For your Moderate profile, there is a balanced harmony between Robot 1 (technical momentum) and Robot 2 (regulatory safety).`;
-    beginnerAnalogy = `Like a sturdy car with both a fast engine and reliable brakes.`;
+    customProfileReasoning = `For Moderate profiles, constructive technical indicators align with clean corporate governance disclosures for core portfolio accumulation.`;
     positionSizeGuidance = 'Allocate 5% to 8% of portfolio.';
   }
 
@@ -440,7 +431,7 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
       agentVerdict: rulebookVerdict,
       weightGiven: riskProfile === 'conservative' ? 0.50 : riskProfile === 'moderate' ? 0.35 : 0.20,
       whyWeightedThisWay: riskProfile === 'conservative' 
-        ? 'Maximum 50% weight assigned to official regulatory safety to protect beginner capital.' 
+        ? 'Assigned 50% dominant weight to official regulatory safety to strictly manage downside risk.' 
         : 'Assigned standard 35% weight to verify corporate governance and balance sheet integrity.'
     },
     {
@@ -457,7 +448,7 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
       agentName: 'The News Detective',
       agentVerdict: newsVerdict,
       weightGiven: riskProfile === 'aggressive' ? 0.25 : 0.20,
-      whyWeightedThisWay: 'Assigned 20-25% weight to ensure institutional FII flow alignment without reacting to unverified social noise.'
+      whyWeightedThisWay: 'Assigned 20-25% weight to ensure institutional FII flow alignment without reacting to unverified market noise.'
     }
   ];
 
@@ -465,17 +456,17 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
   const ai = getGenAI();
   if (ai) {
     try {
-      const prompt = `You are the Boss AI Synthesizer in a multi-agent financial intelligence system for retail investors.
+      const prompt = `You are the Lead Investment Strategist in an institutional multi-agent equity intelligence platform.
 Stock: ${stock.name} (${stock.ticker}) - Price: ₹${stock.currentPrice} (${stock.changePercent > 0 ? '+' : ''}${stock.changePercent}%)
 User Risk Profile: ${riskProfile.toUpperCase()}
 
 Agent Reports:
-1. Chart Detective: Verdict ${chartVerdict}, Confidence ${chartConfidence}%, Summary: ${chartSummary}
-2. Rulebook Detective (SEBI RAG): Verdict ${rulebookVerdict}, Confidence ${rulebookConfidence}%, Summary: ${rulebookSummary}
-3. News Detective: Verdict ${newsVerdict}, Confidence ${newsConfidence}%, Summary: ${newsSummary}
+1. Technical Scout: Verdict ${chartVerdict}, Confidence ${chartConfidence}%, Summary: ${chartSummary}
+2. Regulatory Auditor (SEBI LODR RAG): Verdict ${rulebookVerdict}, Confidence ${rulebookConfidence}%, Summary: ${rulebookSummary}
+3. Macro & Sentiment: Verdict ${newsVerdict}, Confidence ${newsConfidence}%, Summary: ${newsSummary}
 
-Synthesize these 3 reports into a high-level 2-sentence user advice and a simple 1-sentence analogy suitable for a regular person. Return JSON with format:
-{"headline": string, "plainEnglishExplanation": string, "beginnerAnalogy": string}`;
+Synthesize these 3 reports into a rigorous, professional 2-sentence institutional investment thesis. Do not use informal metaphors or child-like analogies. Return JSON with format:
+{"headline": string, "plainEnglishExplanation": string}`;
 
       const aiText = await generateContentResilient(ai, prompt, {
         responseMimeType: "application/json"
@@ -485,7 +476,6 @@ Synthesize these 3 reports into a high-level 2-sentence user advice and a simple
         try {
           const parsed = JSON.parse(aiText);
           if (parsed.headline) headline = parsed.headline;
-          if (parsed.beginnerAnalogy) beginnerAnalogy = parsed.beginnerAnalogy;
         } catch {
           // fallback to deterministic
         }
@@ -504,8 +494,7 @@ Synthesize these 3 reports into a high-level 2-sentence user advice and a simple
     confidenceScore: isMissingFiling ? 62 : isFeedGlitch ? 68 : Math.round((chartConfidence + rulebookConfidence + newsConfidence) / 3),
     riskLevel,
     headline,
-    plainEnglishExplanation: `Our 3 AI detectives reviewed ${stock.name} across 14 technical parameters, official SEBI filings, and live news feeds. For your ${riskProfile} risk profile, we recommend: ${recommendationLabel}.`,
-    beginnerAnalogy,
+    plainEnglishExplanation: `Multi-agent audit across technical price structures, official SEBI LODR regulatory disclosures, and institutional order flows confirms a ${recommendationLabel} thesis.`,
     customProfileReasoning,
     actionPlan: {
       suggestedAction,
@@ -518,7 +507,7 @@ Synthesize these 3 reports into a high-level 2-sentence user advice and a simple
     synthesisMatrix,
     riskWarnings: [
       stock.promoterPledgePct > 0 ? `Promoter pledged shares stand at ${stock.promoterPledgePct}%` : 'Zero promoter pledged shares (Clean)',
-      stock.rsi14 > 70 ? 'RSI indicates short-term overbought condition; avoid chasing FOMO market rallies' : 'RSI is within healthy non-overbought zone',
+      stock.rsi14 > 70 ? 'RSI indicates short-term overbought condition; avoid chasing high volatility spikes' : 'RSI is within healthy non-overbought zone',
       'All recommendations generated through verifiable proof citations and transparent multi-agent reasoning'
     ],
     degradedDataNotice: (isMissingFiling || isFeedGlitch || isConflicting) 

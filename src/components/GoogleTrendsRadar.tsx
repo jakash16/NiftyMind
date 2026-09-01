@@ -4,16 +4,14 @@ import {
   TrendingUp, 
   TrendingDown, 
   Flame, 
-  Sparkles, 
   RefreshCw, 
   Search, 
-  Zap, 
   MapPin, 
   ArrowUpRight,
   Radio,
   Clock
 } from 'lucide-react';
-import { StockData, GoogleTrendsData } from '../types';
+import { StockData } from '../types';
 
 interface GoogleTrendsRadarProps {
   stock: StockData;
@@ -31,9 +29,9 @@ export const GoogleTrendsRadar: React.FC<GoogleTrendsRadarProps> = ({ stock, onS
       setLiveScore(trends.searchScore);
       setQueryFeed(trends.liveQueryStream);
     }
-  }, [stock.ticker]);
+  }, [trends]);
 
-  // Live simulation of streaming Google search queries
+  // Live simulation of streaming search queries
   useEffect(() => {
     if (!isLiveSyncing || !trends) return;
 
@@ -48,7 +46,6 @@ export const GoogleTrendsRadar: React.FC<GoogleTrendsRadarProps> = ({ stock, onS
 
     const interval = setInterval(() => {
       const randomQuery = sampleQueries[Math.floor(Math.random() * sampleQueries.length)];
-      const now = new Date();
       const newEntry = {
         id: `gq-${Date.now()}`,
         query: randomQuery.query,
@@ -59,7 +56,6 @@ export const GoogleTrendsRadar: React.FC<GoogleTrendsRadarProps> = ({ stock, onS
 
       setQueryFeed((prev) => [newEntry, ...prev.slice(0, 4)]);
       
-      // Jiggle score slightly
       setLiveScore((prev) => {
         const delta = Math.floor(Math.random() * 3) - 1;
         return Math.min(99, Math.max(40, prev + delta));
@@ -67,34 +63,34 @@ export const GoogleTrendsRadar: React.FC<GoogleTrendsRadarProps> = ({ stock, onS
     }, 4500);
 
     return () => clearInterval(interval);
-  }, [isLiveSyncing, stock, trends]);
+  }, [isLiveSyncing, stock.name, stock.ticker, trends]);
 
   if (!trends) return null;
 
   const isSurging = liveScore >= 80 || trends.momentum === 'SURGING';
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs mb-6">
+    <div className="bg-[#0A0A0E] rounded-2xl p-6 sm:p-7 border border-white/10 relative overflow-hidden transition-all duration-200">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-xs">
+          <div className="w-10 h-10 rounded-xl bg-cyan-950/40 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
             <Globe className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-wider text-indigo-600 flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 text-rose-500" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                <Flame className="w-3.5 h-3.5 text-rose-400" />
                 Google Trends Real-Time Pulse
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <Radio className="w-2.5 h-2.5 animate-pulse text-emerald-600" />
-                Live Grounding
+              <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <Radio className="w-2.5 h-2.5 text-emerald-400" />
+                Live Grounded
               </span>
             </div>
-            <h3 className="text-lg font-extrabold text-slate-900">
-              Public Search Interest & Breakout Topics for {stock.ticker}
+            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight mt-0.5">
+              Public Search Interest & Breakout Topics for <span className="font-mono">{stock.ticker}</span>
             </h3>
           </div>
         </div>
@@ -102,71 +98,73 @@ export const GoogleTrendsRadar: React.FC<GoogleTrendsRadarProps> = ({ stock, onS
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsLiveSyncing(!isLiveSyncing)}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5 ${
               isLiveSyncing 
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                : 'bg-slate-50 text-slate-500 border-slate-200'
+                ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' 
+                : 'bg-white/5 text-neutral-400 border-white/10'
             }`}
           >
             <RefreshCw className={`w-3 h-3 ${isLiveSyncing ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }} />
-            <span>{isLiveSyncing ? 'Live Stream On' : 'Paused'}</span>
+            <span>{isLiveSyncing ? 'Live Stream Active' : 'Paused'}</span>
           </button>
         </div>
       </div>
 
       {/* Main Grid: Score Gauge + Breakout Queries + Regional Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
         
         {/* Column 1: Search Interest Index Meter */}
-        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between">
+        <div className="bg-[#0E0E14] rounded-xl p-4 border border-white/5 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-              <span>Google Search Index</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${isSurging ? 'bg-rose-100 text-rose-700' : 'bg-indigo-100 text-indigo-700'}`}>
+            <div className="flex items-center justify-between text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">
+              <span>Search Index</span>
+              <span className={`px-2 py-0.2 rounded text-[10px] font-mono font-semibold ${
+                isSurging 
+                  ? 'bg-rose-500/10 text-rose-300 border border-rose-500/20' 
+                  : 'bg-violet-500/10 text-violet-300 border border-violet-500/20'
+              }`}>
                 {trends.momentum}
               </span>
             </div>
 
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-black text-slate-900 font-mono">
+              <span className="text-3xl font-bold text-white font-mono">
                 {liveScore}
               </span>
-              <span className="text-slate-400 text-sm font-semibold">/ 100</span>
-              <span className={`text-xs font-extrabold flex items-center ml-auto ${trends.changePct >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                {trends.changePct >= 0 ? <TrendingUp className="w-3.5 h-3.5 mr-0.5 inline" /> : <TrendingDown className="w-3.5 h-3.5 mr-0.5 inline" />}
+              <span className="text-neutral-500 text-xs font-mono">/ 100</span>
+              <span className={`text-xs font-mono font-medium flex items-center ml-auto ${trends.changePct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {trends.changePct >= 0 ? <TrendingUp className="w-3 h-3 mr-0.5 inline" /> : <TrendingDown className="w-3 h-3 mr-0.5 inline" />}
                 {trends.changePct >= 0 ? '+' : ''}{trends.changePct.toFixed(1)}% (24h)
               </span>
             </div>
 
             {/* Visual Index Bar */}
-            <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden mt-3">
+            <div className="w-full bg-[#181822] h-1.5 rounded-full overflow-hidden mt-3">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  liveScore > 85 ? 'bg-gradient-to-r from-indigo-500 to-rose-500' : 'bg-gradient-to-r from-blue-500 to-indigo-600'
-                }`}
+                className="bg-neutral-300 h-full rounded-full transition-all duration-300"
                 style={{ width: `${liveScore}%` }}
               />
             </div>
 
-            <p className="text-xs text-slate-600 mt-3 font-medium leading-relaxed">
+            <p className="text-xs text-neutral-300 mt-3 leading-relaxed">
               {trends.searchVolumeDescription}
             </p>
           </div>
 
-          <div className="pt-3 mt-3 border-t border-slate-200/80 text-[11px] text-slate-400 flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            <span>Updated with Google Trends Grounding</span>
+          <div className="pt-3 mt-3 border-t border-white/10 text-[10px] font-mono text-neutral-400 flex items-center gap-1.5">
+            <Clock className="w-3 h-3 text-cyan-400" />
+            <span>Grounding synced via Google Search</span>
           </div>
         </div>
 
         {/* Column 2: Breakout Google Search Queries */}
-        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-            <span className="flex items-center gap-1.5">
-              <Search className="w-3.5 h-3.5 text-indigo-600" />
+        <div className="bg-[#0E0E14] rounded-xl p-4 border border-white/5">
+          <div className="flex items-center justify-between text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">
+            <span className="flex items-center gap-1.5 text-white">
+              <Search className="w-3.5 h-3.5 text-cyan-400" />
               Breakout Search Topics
             </span>
-            <span className="text-[10px] text-slate-400">Google Trends</span>
+            <span className="text-[10px] text-neutral-500">Google Trends</span>
           </div>
 
           <div className="space-y-2">
@@ -174,16 +172,16 @@ export const GoogleTrendsRadar: React.FC<GoogleTrendsRadarProps> = ({ stock, onS
               <div
                 key={idx}
                 onClick={() => onSelectQuery && onSelectQuery(item.query)}
-                className="p-2.5 rounded-xl bg-white border border-slate-200/80 hover:border-indigo-300 hover:shadow-2xs transition-all cursor-pointer flex items-center justify-between gap-2"
+                className="p-2.5 rounded-lg bg-[#14141C] border border-white/5 hover:border-white/20 transition-all cursor-pointer flex items-center justify-between gap-2 group"
               >
-                <div className="truncate text-xs font-bold text-slate-800">
+                <div className="truncate text-xs text-neutral-200 group-hover:text-white">
                   {item.query}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <span className="text-[10px] font-mono font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  <span className="text-[10px] font-mono font-medium text-emerald-300 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
                     {item.growth}
                   </span>
-                  <ArrowUpRight className="w-3 h-3 text-slate-400" />
+                  <ArrowUpRight className="w-3 h-3 text-neutral-500 group-hover:text-cyan-400 transition-colors" />
                 </div>
               </div>
             ))}
@@ -191,28 +189,28 @@ export const GoogleTrendsRadar: React.FC<GoogleTrendsRadarProps> = ({ stock, onS
         </div>
 
         {/* Column 3: Live Query Feed & Regional Interest */}
-        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between">
+        <div className="bg-[#0E0E14] rounded-xl p-4 border border-white/5 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">
-              <span className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-purple-600" />
-                Regional Search Intensity
+            <div className="flex items-center justify-between text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">
+              <span className="flex items-center gap-1.5 text-white">
+                <MapPin className="w-3.5 h-3.5 text-violet-400" />
+                Regional Search Heat
               </span>
-              <span className="text-[10px] text-indigo-600 font-bold">Top States</span>
+              <span className="text-[10px] text-cyan-400 font-mono">Top States</span>
             </div>
 
-            <div className="space-y-1.5 mb-3">
+            <div className="space-y-2 mb-3">
               {trends.regionalBreakdown.slice(0, 3).map((reg) => (
                 <div key={reg.region} className="flex items-center justify-between text-xs">
-                  <span className="text-slate-700 font-semibold">{reg.region}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-20 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                  <span className="text-neutral-300">{reg.region}</span>
+                  <div className="flex items-center gap-2 font-mono">
+                    <div className="w-16 bg-[#181822] h-1.5 rounded-full overflow-hidden">
                       <div
-                        className="bg-indigo-600 h-full rounded-full"
+                        className="bg-neutral-300 h-full rounded-full"
                         style={{ width: `${reg.intensity}%` }}
                       />
                     </div>
-                    <span className="font-mono text-[10px] font-bold text-slate-500 w-6 text-right">
+                    <span className="text-[10px] text-neutral-400 w-5 text-right">
                       {reg.intensity}
                     </span>
                   </div>
@@ -221,16 +219,16 @@ export const GoogleTrendsRadar: React.FC<GoogleTrendsRadarProps> = ({ stock, onS
             </div>
 
             {/* Live Streaming Queries */}
-            <div className="pt-2 border-t border-slate-200/80">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                Recent Consumer Inquiries:
+            <div className="pt-3 border-t border-white/10">
+              <div className="text-[10px] font-medium text-neutral-400 uppercase tracking-wider mb-1.5">
+                Live Consumer Inquiries:
               </div>
               <div className="space-y-1">
                 {queryFeed.slice(0, 2).map((q) => (
-                  <div key={q.id} className="text-[11px] text-slate-600 truncate flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                    <span className="font-medium text-slate-800 truncate">"{q.query}"</span>
-                    <span className="text-[9px] text-slate-400 font-mono shrink-0">({q.location})</span>
+                  <div key={q.id} className="text-[11px] text-neutral-400 truncate flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                    <span className="text-neutral-200 truncate">"{q.query}"</span>
+                    <span className="text-[9px] text-neutral-500 shrink-0 font-mono">({q.location})</span>
                   </div>
                 ))}
               </div>

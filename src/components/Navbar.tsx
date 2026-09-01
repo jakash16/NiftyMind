@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Shield, Zap, TrendingUp, Bell, Bot, Sparkles, AlertCircle, FileText, CheckCircle2, ChevronDown, Check, Cpu, Globe, ArrowUpRight, Loader2 } from 'lucide-react';
+import { Search, Shield, Zap, TrendingUp, Bell, Bot, ChevronDown, Check, Cpu, Globe, ArrowUpRight, Loader2 } from 'lucide-react';
 import { RiskProfileType, StockData, NotificationItem } from '../types';
 import { searchLiveSymbols } from '../services/api';
 
@@ -97,26 +97,26 @@ export const Navbar: React.FC<NavbarProps> = ({
     {
       id: 'conservative' as RiskProfileType,
       title: 'Conservative',
-      subtitle: 'Safe & Steady',
+      subtitle: 'Zero Risk Tolerance & Capital Protection',
       icon: Shield,
-      badge: 'Zero Risk Tolerance',
-      color: 'text-emerald-700 bg-emerald-50 border-emerald-200'
+      badge: 'Defensive',
+      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
     },
     {
       id: 'moderate' as RiskProfileType,
       title: 'Moderate',
-      subtitle: 'Balanced Builder',
+      subtitle: 'Balanced Multi-Agent Growth',
       icon: TrendingUp,
-      badge: 'Balanced Growth',
-      color: 'text-indigo-700 bg-indigo-50 border-indigo-200'
+      badge: 'Balanced',
+      color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20'
     },
     {
       id: 'aggressive' as RiskProfileType,
       title: 'Aggressive',
-      subtitle: 'High Momentum',
+      subtitle: 'High Momentum & Breakout Hunter',
       icon: Zap,
-      badge: 'High Reward',
-      color: 'text-purple-700 bg-purple-50 border-purple-200'
+      badge: 'Aggressive',
+      color: 'text-violet-400 bg-violet-500/10 border-violet-500/20'
     }
   ];
 
@@ -124,33 +124,46 @@ export const Navbar: React.FC<NavbarProps> = ({
   const CurrentIcon = currentRisk.icon;
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-2xs">
+    <header className="sticky top-0 z-40 bg-[#08080C] border-b border-white/10 transition-colors">
+      {/* Micro ticker top strip */}
+      <div className="border-b border-white/5 py-1 px-4 overflow-hidden bg-[#050505] text-[11px] text-neutral-400 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span className="text-neutral-300 font-medium uppercase tracking-wider text-[10px]">
+            Autonomous Swarm Active
+          </span>
+        </div>
+        <div className="hidden md:flex items-center gap-4 text-[10px] text-neutral-400 font-mono">
+          <span>LATENCY: <strong className="text-cyan-400 font-medium">32ms</strong></span>
+          <span>ENGINE: <strong className="text-neutral-200 font-medium">GEMINI 2.5</strong></span>
+          <span>MARKET: <strong className="text-emerald-400 font-medium">NSE/BSE</strong></span>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-3 sm:gap-6">
+        <div className="flex items-center justify-between h-14 gap-3 sm:gap-6">
           
           {/* Logo & Geometric Branding */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-sm ring-2 ring-indigo-100">
-              <Cpu className="w-5 h-5" />
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div className="w-8 h-8 bg-[#161620] rounded-lg flex items-center justify-center text-white border border-white/10">
+              <Cpu className="w-4 h-4 text-cyan-400" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight">Nifty<span className="text-indigo-600 font-bold">Mind</span></span>
-                <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                  <Sparkles className="w-3 h-3 mr-1 text-indigo-500" />
-                  Live NSE/BSE Feed
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-base text-white tracking-tight">
+                  Nifty<span className="text-neutral-400 font-normal">Mind</span>
+                </span>
+                <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-neutral-300 border border-white/10">
+                  3-Agent Swarm
                 </span>
               </div>
-              <p className="text-[10px] font-semibold text-slate-400 hidden sm:block tracking-wide uppercase">
-                Autonomous Multi-Agent Financial Intelligence
-              </p>
             </div>
           </div>
 
-          {/* Rounded-full Geometric Search Bar */}
+          {/* Obsidian Search Bar */}
           <div ref={searchRef} className="relative flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
               <input
                 id="stock-search-input"
                 type="text"
@@ -160,30 +173,30 @@ export const Navbar: React.FC<NavbarProps> = ({
                   setIsSearchOpen(true);
                 }}
                 onFocus={() => setIsSearchOpen(true)}
-                placeholder="Search any stock, ticker (e.g. TCS, ITC, SBIN, RELIANCE, AAPL)..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-sm text-slate-900 placeholder-slate-400 rounded-full border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-hidden transition-all shadow-2xs"
+                placeholder="Search ticker (e.g. TATAMOTORS, RELIANCE, TCS)..."
+                className="w-full pl-9 pr-8 py-1.5 bg-[#0F0F14] hover:bg-[#14141C] focus:bg-[#12121A] text-xs text-white placeholder-neutral-500 rounded-lg border border-white/10 focus:border-white/25 outline-hidden transition-all"
               />
               {isSearchingLive && (
-                <Loader2 className="absolute right-12 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-indigo-500 animate-spin" />
+                <Loader2 className="absolute right-8 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400 animate-spin" />
               )}
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400 hover:text-white"
                 >
-                  Clear
+                  ✕
                 </button>
               )}
             </div>
 
             {/* Search Dropdown */}
             {isSearchOpen && (
-              <div className="absolute left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 max-h-96 overflow-y-auto z-50 animate-in fade-in zoom-in-95 duration-100 divide-y divide-slate-100">
+              <div className="absolute left-0 right-0 mt-2 bg-[#0E0E14] rounded-xl border border-white/10 py-2 max-h-96 overflow-y-auto z-50 divide-y divide-white/5 shadow-2xl">
                 {/* Watchlist & Popular Stocks */}
                 {filteredStocks.length > 0 && (
                   <div>
-                    <div className="px-3.5 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      Watchlist & Top Stocks
+                    <div className="px-3.5 py-1 text-[10px] font-medium text-neutral-400 uppercase tracking-wider">
+                      Preset Equities & Watchlist
                     </div>
                     {filteredStocks.map((stock) => (
                       <button
@@ -193,28 +206,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setIsSearchOpen(false);
                           setSearchQuery('');
                         }}
-                        className={`w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition-colors ${
-                          stock.ticker === currentStock.ticker ? 'bg-indigo-50/70' : ''
+                        className={`w-full px-3.5 py-2 flex items-center justify-between text-left hover:bg-white/5 transition-colors ${
+                          stock.ticker === currentStock.ticker ? 'bg-white/5' : ''
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-700 border border-slate-200">
+                          <div className="w-7 h-7 rounded bg-white/5 flex items-center justify-center font-bold text-xs text-neutral-300 border border-white/5 font-mono">
                             {stock.ticker.slice(0, 3)}
                           </div>
                           <div>
                             <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-sm text-slate-900">{stock.ticker}</span>
-                              <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 text-slate-600">
+                              <span className="font-semibold text-xs text-white font-mono">{stock.ticker}</span>
+                              <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-white/5 text-neutral-400">
                                 {stock.exchange}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-500 truncate max-w-[200px]">{stock.name}</p>
+                            <p className="text-[11px] text-neutral-400 truncate max-w-[200px]">{stock.name}</p>
                           </div>
                         </div>
 
-                        <div className="text-right">
-                          <div className="font-bold text-sm text-slate-900 font-mono">₹{stock.currentPrice.toFixed(2)}</div>
-                          <div className={`text-xs font-bold font-mono ${stock.change >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        <div className="text-right font-mono">
+                          <div className="font-semibold text-xs text-white">₹{stock.currentPrice.toFixed(2)}</div>
+                          <div className={`text-[11px] font-medium ${stock.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {stock.change >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
                           </div>
                         </div>
@@ -226,9 +239,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {/* Real-time Exchange Live Results */}
                 {liveSearchResults.length > 0 && (
                   <div className="pt-2">
-                    <div className="px-3.5 py-1.5 text-[11px] font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1">
+                    <div className="px-3.5 py-1 text-[10px] font-medium text-cyan-400 uppercase tracking-wider flex items-center gap-1">
                       <Globe className="w-3 h-3" />
-                      Live Exchange Search Results
+                      Live Exchange Search
                     </div>
                     {liveSearchResults.map((item) => (
                       <button
@@ -238,78 +251,58 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setIsSearchOpen(false);
                           setSearchQuery('');
                         }}
-                        className="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-indigo-50/50 transition-colors"
+                        className="w-full px-3.5 py-2 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
                       >
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center font-bold text-xs text-indigo-700 border border-indigo-200">
+                          <div className="w-7 h-7 rounded bg-cyan-950/40 flex items-center justify-center font-bold text-xs text-cyan-300 border border-cyan-500/30 font-mono">
                             {item.cleanTicker.slice(0, 3)}
                           </div>
                           <div>
                             <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-sm text-slate-900">{item.cleanTicker}</span>
-                              <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-indigo-100/70 text-indigo-700 font-mono">
+                              <span className="font-semibold text-xs text-white font-mono">{item.cleanTicker}</span>
+                              <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-white/5 text-neutral-400">
                                 {item.exchange}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-500 truncate max-w-[220px]">{item.name}</p>
+                            <p className="text-[11px] text-neutral-400 truncate max-w-[220px]">{item.name}</p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1 text-xs font-bold text-indigo-600">
-                          <span>Audit Live</span>
+                        <div className="flex items-center gap-1 text-xs font-semibold text-cyan-400">
+                          <span>Audit</span>
                           <ArrowUpRight className="w-3.5 h-3.5" />
                         </div>
                       </button>
                     ))}
                   </div>
                 )}
-
-                {/* Direct Ticker Loader */}
-                {searchQuery.trim().length > 0 && filteredStocks.length === 0 && liveSearchResults.length === 0 && (
-                  <div className="p-4 text-center">
-                    <p className="text-sm text-slate-600 mb-2">
-                      Load real-time live market feed for <span className="font-bold text-indigo-600">"{searchQuery.toUpperCase()}"</span>?
-                    </p>
-                    <button
-                      onClick={() => {
-                        onSelectStock(searchQuery.trim().toUpperCase());
-                        setIsSearchOpen(false);
-                        setSearchQuery('');
-                      }}
-                      className="px-4 py-1.5 rounded-full bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-700 shadow-sm"
-                    >
-                      Fetch & Audit {searchQuery.trim().toUpperCase()}
-                    </button>
-                  </div>
-                )}
               </div>
             )}
           </div>
 
-          {/* Right Actions: Risk Profile, Notifications, Chat, Judges Architecture */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Right Actions */}
+          <div className="flex items-center gap-2">
             
-            {/* Risk Profile Switcher Button */}
+            {/* Risk Profile Switcher */}
             <div ref={profileRef} className="relative">
               <button
                 id="risk-profile-selector"
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                className="flex items-center gap-2 px-3.5 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full text-xs font-bold text-slate-800 transition-all shadow-2xs"
-                title="Change Investor Risk Profile to see custom Boss AI advice"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F0F14] hover:bg-[#14141C] border border-white/10 rounded-lg text-xs font-medium text-neutral-200 transition-all"
               >
-                <CurrentIcon className="w-3.5 h-3.5 text-indigo-600" />
-                <span className="hidden sm:inline font-medium text-slate-500">Profile:</span>
-                <span className="font-extrabold text-slate-900">{currentRisk.title}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <CurrentIcon className="w-3.5 h-3.5 text-neutral-300" />
+                <span className="hidden sm:inline text-neutral-400">Risk:</span>
+                <span className="font-medium text-white">{currentRisk.title}</span>
+                <ChevronDown className="w-3 h-3 text-neutral-400" />
               </button>
 
               {/* Profile Dropdown */}
               {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                    <div className="text-xs font-bold text-slate-900">Select Investor Persona</div>
-                    <p className="text-[11px] text-slate-500">
-                      The Boss AI dynamically adapts its advice & stop-loss rules to your profile.
+                <div className="absolute right-0 mt-2 w-72 bg-[#0E0E14] rounded-xl border border-white/10 p-2 z-50 shadow-2xl">
+                  <div className="px-3 py-2 border-b border-white/5 mb-1">
+                    <div className="text-xs font-semibold text-white">Investor Risk Persona</div>
+                    <p className="text-[11px] text-neutral-400 mt-0.5">
+                      The Boss AI adjusts arbitration weights & stop-loss rules to your profile.
                     </p>
                   </div>
 
@@ -323,23 +316,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                           onChangeRiskProfile(p.id);
                           setIsProfileDropdownOpen(false);
                         }}
-                        className={`w-full p-2.5 rounded-xl text-left flex items-start gap-3 transition-colors ${
-                          isSelected ? 'bg-indigo-50/70 border border-indigo-200' : 'hover:bg-slate-50'
+                        className={`w-full p-2 rounded-lg text-left flex items-start gap-2.5 transition-colors ${
+                          isSelected ? 'bg-white/10 text-white' : 'hover:bg-white/5 text-neutral-300'
                         }`}
                       >
-                        <div className={`p-2 rounded-lg ${p.color} shrink-0 mt-0.5`}>
-                          <Icon className="w-4 h-4" />
+                        <div className="p-1.5 rounded bg-white/5 text-white shrink-0 mt-0.5">
+                          <Icon className="w-3.5 h-3.5" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <span className="font-bold text-xs text-slate-900">{p.title}</span>
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                            <span className="font-medium text-xs text-white">{p.title}</span>
+                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/5 text-neutral-400">
                               {p.badge}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-500 mt-0.5">{p.subtitle}</p>
+                          <p className="text-[11px] text-neutral-400 mt-0.5">{p.subtitle}</p>
                         </div>
-                        {isSelected && <Check className="w-4 h-4 text-indigo-600 shrink-0 mt-1" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 mt-1" />}
                       </button>
                     );
                   })}
@@ -351,12 +344,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="notification-bell-btn"
               onClick={onOpenNotifications}
-              className="relative p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors"
-              title="System Alerts & Filings Notifications"
+              className="relative p-2 text-neutral-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+              title="System Alerts & Notifications"
             >
-              <Bell className="w-5 h-5" />
+              <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[10px] font-extrabold flex items-center justify-center animate-pulse">
+                <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-rose-500 text-white rounded-full text-[9px] font-mono font-bold flex items-center justify-center">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -366,21 +359,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="agent-chat-launcher"
               onClick={onOpenChat}
-              className="flex items-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-full text-xs font-bold transition-all shadow-2xs"
-              title="Interrogate specific AI detectives"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#121218] hover:bg-[#181822] text-neutral-200 border border-white/10 rounded-lg text-xs font-medium transition-all"
             >
-              <Bot className="w-4 h-4 text-indigo-600" />
-              <span className="hidden sm:inline">Ask Detectives</span>
+              <Bot className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden sm:inline">Ask Swarm</span>
             </button>
 
-            {/* Architecture Modal Button for Judges */}
+            {/* Architecture Guide */}
             <button
               id="architecture-guide-btn"
               onClick={onOpenArchitectureModal}
-              className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors"
-              title="View Multi-Agent Architecture & Rubric Breakdown"
+              className="px-2.5 py-1.5 text-xs text-neutral-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/10"
+              title="System Architecture Diagram"
             >
-              <Sparkles className="w-5 h-5 text-indigo-500" />
+              Docs
             </button>
 
           </div>
@@ -390,4 +382,3 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
-
