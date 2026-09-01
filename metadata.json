@@ -1,0 +1,8 @@
+{
+  "name": "NiftyMind",
+  "description": "Multi-agent autonomous financial intelligence platform with 3 parallel AI detectives (Chart, Rulebook RAG, News Sentiment) and Boss AI synthesizer for retail investors.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
