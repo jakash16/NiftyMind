@@ -35,19 +35,3 @@ NiftyMind analyzes stocks using a team of specialized AI agents working together
 
 ---
 
-## Quick Start
-
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Add your Gemini API Key to `.env`:**
-   ```env
-   GEMINI_API_KEY="your_api_key_here"
-   ```
-
-3. **Start the app:**
-   ```bash
-   npm run dev
-   ```
