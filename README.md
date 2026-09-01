@@ -35,3 +35,6 @@ NiftyMind analyzes stocks using a team of specialized AI agents working together
 
 ---
 
+**This is the link to the website**
+https://niftymind-503443016970.asia-southeast1.run.app/
+
